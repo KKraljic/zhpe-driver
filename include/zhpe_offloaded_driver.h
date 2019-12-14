@@ -34,8 +34,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_DRIVER_H_
-#define _ZHPE_DRIVER_H_
+#ifndef _ZHPE_OFFLOADED_DRIVER_H_
+#define _ZHPE_OFFLOADED_DRIVER_H_
 
 #include <linux/module.h>
 #include <linux/bitmap.h>
@@ -44,10 +44,10 @@
 #include <linux/interrupt.h>
 #include <linux/mmu_notifier.h>
 
-extern uint zhpe_debug_flags;
-extern const char zhpe_driver_name[];
+extern uint zhpe_offloaded_debug_flags;
+extern const char zhpe_offloaded_driver_name[];
 extern uint no_iommu;
-extern struct zhpe_global_shared_data *global_shared_data;
+extern struct zhpe_offloaded_global_shared_data *global_shared_data;
 
 #if defined(NDEBUG)
 #define debug_cond(_mask, _cond, _fmt, ...) do {} while (0)
@@ -57,7 +57,7 @@ extern struct zhpe_global_shared_data *global_shared_data;
 #else
 #define  debug_cond(_mask,_cond,  _fmt, ...)            \
 do {                                                    \
-    if ((zhpe_debug_flags & (_mask)) && (_cond))             \
+    if ((zhpe_offloaded_debug_flags & (_mask)) && (_cond))             \
         printk(KERN_DEBUG _fmt, ##__VA_ARGS__);         \
 } while (0)
 #define debug(_mask, _fmt, ...) debug_cond(_mask, true, _fmt, ##__VA_ARGS__)
@@ -68,12 +68,12 @@ do {                                                    \
 
 /* platforms that the zhpe driver supports through the platform parameter */
 enum {
-    ZHPE_CARBON          = 0x1,
-    ZHPE_PFSLICE         = 0x2,
-    ZHPE_WILDCAT         = 0x3,
+    ZHPE_OFFLOADED_CARBON          = 0x1,
+    ZHPE_OFFLOADED_PFSLICE         = 0x2,
+    ZHPE_OFFLOADED_WILDCAT         = 0x3,
 };
 
-extern int zhpe_platform;
+extern int zhpe_offloaded_platform;
 
 struct xdm_qcm_header {
     uint64_t cmd_q_base_addr  : 64; /* byte 0 */
@@ -209,10 +209,10 @@ struct big_hammer_containment {
 /* Platform dependent values */
 
 /* Global platform specific variables */
-extern unsigned int zhpe_req_zmmu_entries;
-extern unsigned int zhpe_rsp_zmmu_entries;
-extern unsigned int zhpe_xdm_queues_per_slice;
-extern unsigned int zhpe_rdm_queues_per_slice;
+extern unsigned int zhpe_offloaded_req_zmmu_entries;
+extern unsigned int zhpe_offloaded_rsp_zmmu_entries;
+extern unsigned int zhpe_offloaded_xdm_queues_per_slice;
+extern unsigned int zhpe_offloaded_rdm_queues_per_slice;
 
 
 /* Carbon Simulator Platform */
@@ -234,9 +234,9 @@ extern unsigned int zhpe_rdm_queues_per_slice;
 #define WILDCAT_RDM_QUEUES_PER_SLICE        (256)
 
 /* Platform values common to all platforms */
-#define ZHPE_MAX_XDM_QLEN                 (BIT(16)-1)
-#define ZHPE_MAX_RDM_QLEN                 (BIT(20)-1)
-#define ZHPE_MAX_DMA_LEN                  (1U << 31)
+#define ZHPE_OFFLOADED_MAX_XDM_QLEN                 (BIT(16)-1)
+#define ZHPE_OFFLOADED_MAX_RDM_QLEN                 (BIT(20)-1)
+#define ZHPE_OFFLOADED_MAX_DMA_LEN                  (1U << 31)
 #define MAX_REQ_ZMMU_ENTRIES              (128*1024)
 #define MAX_RSP_ZMMU_ENTRIES              (64*1024)
 #define CONTAINMENT_COUNTER_ALIASES       (128*1024)
@@ -377,7 +377,7 @@ struct bridge {
     struct rdm_info       msg_rdm;
     spinlock_t            fdata_lock;  /* protects fdata_list */
     struct list_head      fdata_list;
-    wait_queue_head_t     zhpe_poll_wq[MAX_IRQ_VECTORS];
+    wait_queue_head_t     zhpe_offloaded_poll_wq[MAX_IRQ_VECTORS];
 };
 
 struct queue_zpage {
@@ -403,7 +403,7 @@ struct dma_zpage {
 struct rmr_zpage {
 	int		page_type;
 	size_t		size;	/* in bytes */
-	struct zhpe_rmr *rmr;
+	struct zhpe_offloaded_rmr *rmr;
 };
 
 struct hdr_zpage {
@@ -464,20 +464,20 @@ struct file_data {
     struct mmu_notifier mmun;
 };
 
-int zhpe_mmun_init(struct file_data *fdata);
-void zhpe_mmun_exit(struct file_data *fdata);
+int zhpe_offloaded_mmun_init(struct file_data *fdata);
+void zhpe_offloaded_mmun_exit(struct file_data *fdata);
 
 struct io_entry {
     void                (*free)(const char *callf, uint line, void *ptr);
     atomic_t            count;
     bool                nonblock;
-    struct zhpe_common_hdr hdr;
+    struct zhpe_offloaded_common_hdr hdr;
     struct file_data    *fdata;
     struct list_head    list;
     size_t              data_len;
     union {
         uint8_t         data[0];
-        union zhpe_op   op;
+        union zhpe_offloaded_op   op;
     };
 };
 
@@ -488,7 +488,7 @@ enum {
 };
 
 /* Globals */
-extern struct bridge    zhpe_bridge;
+extern struct bridge    zhpe_offloaded_bridge;
 extern uint genz_gcid;
 extern uint genz_loopback;
 
@@ -561,7 +561,7 @@ enum {
 	GLOBAL_SHARED_PAGE =   6
 };
 
-struct zhpe_rmr;  /* tentative definition */
+struct zhpe_offloaded_rmr;  /* tentative definition */
 
 union zpages *_queue_zpages_alloc(const char *callf, uint line, 
 	size_t size, bool contig);
@@ -579,7 +579,7 @@ union zpages *_hsr_zpage_alloc(const char *callf, uint line,
     _hsr_zpage_alloc(__func__, __LINE__, __VA_ARGS__)
 
 union zpages *_rmr_zpages_alloc(const char *callf, uint line,
-                                struct zhpe_rmr *rmr);
+                                struct zhpe_offloaded_rmr *rmr);
 #define rmr_zpages_alloc(...) \
     _rmr_zpages_alloc(__func__, __LINE__, __VA_ARGS__)
 
@@ -642,12 +642,12 @@ static inline void radix_tree_iter_delete(struct radix_tree_root *root,
 }
 #endif
 
-#include <zhpe_uuid.h>
-#include <zhpe_zmmu.h>
-#include <zhpe_memreg.h>
-#include <zhpe_pasid.h>
-#include <zhpe_queue.h>
-#include <zhpe_rkey.h>
-#include <zhpe_msg.h>
-#include <zhpe_intr.h>
-#endif /* _ZHPE_DRIVER_H_ */
+#include "zhpe_offloaded_uuid.h"
+#include "zhpe_offloaded_zmmu.h"
+#include "zhpe_offloaded_memreg.h"
+#include "zhpe_offloaded_pasid.h"
+#include "zhpe_offloaded_queue.h"
+#include "zhpe_offloaded_rkey.h"
+#include "zhpe_offloaded_msg.h"
+#include "zhpe_offloaded_intr.h"
+#endif /* _ZHPE_OFFLOADED_DRIVER_H_ */

@@ -3,7 +3,7 @@ set -e
 
 # dkms_post_install.sh
 
-HNAME="zhpe_helper"
+HNAME="zhpe_offloaded_helper"
 HDIR="/usr/local/libexec"   # optional on Debian/Ubuntu
 HPATH="${HDIR}/${HNAME}"
 PCONF="dkms/modprobe_zhpe.conf"
@@ -13,13 +13,13 @@ MPATH="/etc/modules-load.d/zhpe.conf"
 
 (( $# == 2 )) || exit 1
 
-ZHPE_HELPER=$1/$HNAME
+ZHPE_OFFLOADED_HELPER=$1/$HNAME
 KERNELVER=$2
 
 # Setup on first version
 if [ ! -f $HPATH ] ; then
     mkdir -p $HDIR
-    cp $ZHPE_HELPER $HDIR
+    cp $ZHPE_OFFLOADED_HELPER $HDIR
     cp $PCONF $PPATH
     cp $MCONF $MPATH
 fi

@@ -41,8 +41,8 @@
 #include <linux/bitmap.h>
 #include <linux/random.h>
 #include <linux/rbtree_augmented.h>
-#include "zhpe.h"
-#include "zhpe_driver.h"
+#include "zhpe_offloaded.h"
+#include "zhpe_offloaded_driver.h"
 
 #define RKEY_RAND_BYTES  (((RKEY_RKD_SHIFT + 7) & ~7) / 8)
 #define RKEY_BITMAP_SZ   256
@@ -69,7 +69,7 @@ struct rkey_node {
 
 static struct rkey_info rki;
 
-void zhpe_rkey_init(void)
+void zhpe_offloaded_rkey_init(void)
 {
     atomic_set(&rki.allocated, 0);
     rki.rbtree = RB_ROOT;
@@ -80,16 +80,16 @@ void zhpe_rkey_init(void)
         uint32_t ro_rkey, rw_rkey;
 
         debug(DEBUG_RKEYS, "%s:%s,%u: RKEY_TOTAL=%ld, RKEY_RAND_BYTES=%d, RKEY_BASE_MASK=0x%x, RKEY_DEBUG_ALLOC=%d\n",
-              zhpe_driver_name, __func__, __LINE__,
+              zhpe_offloaded_driver_name, __func__, __LINE__,
               RKEY_TOTAL, RKEY_RAND_BYTES, RKEY_BASE_MASK, RKEY_DEBUG_ALLOC);
         for (i = 0; i < RKEY_DEBUG_ALLOC; i++)
-            zhpe_rkey_alloc(&ro_rkey, &rw_rkey);
+            zhpe_offloaded_rkey_alloc(&ro_rkey, &rw_rkey);
 
-        zhpe_rkey_print_all();
+        zhpe_offloaded_rkey_print_all();
     }
 }
 
-void zhpe_rkey_exit(void)
+void zhpe_offloaded_rkey_exit(void)
 {
     struct rb_node *rb, *next;
     ulong flags;
@@ -100,7 +100,7 @@ void zhpe_rkey_exit(void)
         struct rkey_node *rkn = rb_entry(rb, struct rkey_node, rb);
 
         debug(DEBUG_RKEYS, "%s:%s,%u:rkey_base=0x%05x, rkn_count=%u\n",
-              zhpe_driver_name, __func__, __LINE__,
+              zhpe_offloaded_driver_name, __func__, __LINE__,
               rkn->rkey_base, rkn_count(rkn));
         next = rb_next_postorder(rb);  /* must precede kfree() */
         do_kfree(rkn);
@@ -279,7 +279,7 @@ static struct rkey_node *insert_nth_free_rkey(struct rkey_info *rki,
     return ret;  /* either the new node we added or the one we found */
 }
 
-int zhpe_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey)
+int zhpe_offloaded_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey)
 {
     uint32_t rand = 0, rkey;
     u8 rand_bytes[RKEY_RAND_BYTES];
@@ -330,7 +330,7 @@ int zhpe_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey)
  out:
 #if RKEY_DEBUG_ALL
     debug(DEBUG_RKEYS, "%s:%s,%u: ret=%d, allocated=%d, rand=0x%05x (bytes=%02x:%02x:%02x), ro_rkey=0x%08x, rw_rkey=0x%08x\n",
-          zhpe_driver_name, __func__, __LINE__,
+          zhpe_offloaded_driver_name, __func__, __LINE__,
           ret, allocated, rand,
           rand_bytes[2], rand_bytes[1], rand_bytes[0],
           *ro_rkey, *rw_rkey);
@@ -338,7 +338,7 @@ int zhpe_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey)
     return ret;
 }
 
-void zhpe_rkey_free(uint32_t ro_rkey, uint32_t rw_rkey)
+void zhpe_offloaded_rkey_free(uint32_t ro_rkey, uint32_t rw_rkey)
 {
     if ((ro_rkey & RKEY_OS_MASK) != (rw_rkey & RKEY_OS_MASK))
         return;
@@ -366,7 +366,7 @@ static char *rkey_bitmap_str(const unsigned long *bitmap, char *str,
 }
 #endif
 
-void zhpe_rkey_print_all(void)
+void zhpe_offloaded_rkey_print_all(void)
 {
     struct rb_node *node;
     uint32_t nodes = 0;
@@ -381,7 +381,7 @@ void zhpe_rkey_print_all(void)
         struct rkey_node *rkn = rb_entry(node, struct rkey_node, rb);
 
         debug(DEBUG_RKEYS, "%s:%s,%u:rkey_base=0x%05x, count=%u, bitmap=%s, rkn_count=%u, rkn=%pxx, left=%pxx, right=%pxx\n",
-              zhpe_driver_name, __func__, __LINE__,
+              zhpe_offloaded_driver_name, __func__, __LINE__,
               rkn->rkey_base, rkn->count,
               rkey_bitmap_str(rkn->bitmap, str, sizeof(str)),
               rkn_count(rkn), rkn, rkn->rb.rb_left, rkn->rb.rb_right);
@@ -390,7 +390,7 @@ void zhpe_rkey_print_all(void)
     }
 
     debug(DEBUG_RKEYS, "%s:%s,%u: allocated=%d, nodes=%u\n",
-          zhpe_driver_name, __func__, __LINE__,
+          zhpe_offloaded_driver_name, __func__, __LINE__,
           atomic_read(&rki.allocated), nodes);
     spin_unlock_irqrestore(&rki.rk_lock, flags);
 }

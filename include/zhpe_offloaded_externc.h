@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Hewlett Packard Enterprise Development LP.
+ * Copyright (C) 2017-2018 Hewlett Packard Enterprise Development LP.
  * All rights reserved.
  *
  * This software is available to you under a choice of one of two
@@ -34,15 +34,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_PASID_H_
-#define _ZHPE_PASID_H_
+#ifndef _ZHPE_OFFLOADED_EXTERNC_H_
+#define _ZHPE_OFFLOADED_EXTERNC_H_
 
-#define ZHPE_NUM_PASIDS  BIT(16)
-#define NO_PASID         0
+/* Do extern "C" without goofing up emacs. */
+#ifdef  __cplusplus
+#define _EXTERN_C_BEG extern "C" {
+#define _EXTERN_C_END }
+#else
+#define _EXTERN_C_BEG
+#define _EXTERN_C_END
+#endif
 
-void zhpe_pasid_init(void);
-void zhpe_pasid_exit(void);
-int zhpe_pasid_alloc(unsigned int *pasid);
-void zhpe_pasid_free(unsigned int pasid);
-
-#endif /* _ZHPE_PASID_H_ */
+#endif /* _ZHPE_OFFLOADED_EXTERNC_H_ */

@@ -34,10 +34,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_ZMMU_H_
-#define _ZHPE_ZMMU_H_
+#ifndef _ZHPE_OFFLOADED_ZMMU_H_
+#define _ZHPE_OFFLOADED_ZMMU_H_
 
-extern uint zhpe_no_avx;
+extern uint zhpe_offloaded_no_avx;
 
 #define ROUND_DOWN_PAGE(_addr, _sz) ((_addr) & -(_sz))
 #define ROUND_UP_PAGE(_addr, _sz)   (((_addr) + ((_sz) - 1)) & -(_sz))
@@ -73,7 +73,7 @@ enum valid_type {
 #pragma GCC target("avx")
 static inline void ioread16by(void *dst, const volatile void __iomem *src)
 {
-    if (zhpe_no_avx) {  /* Revisit: workaround */
+    if (zhpe_offloaded_no_avx) {  /* Revisit: workaround */
         uint64_t *d64 = dst;
         const volatile uint64_t __iomem *s64 = src;
         *d64 = ioread64(s64);
@@ -92,7 +92,7 @@ static inline void ioread16by(void *dst, const volatile void __iomem *src)
 
 static inline void iowrite16by(void *src, volatile void __iomem *dst)
 {
-    if (zhpe_no_avx) {  /* Revisit: workaround */
+    if (zhpe_offloaded_no_avx) {  /* Revisit: workaround */
         volatile uint64_t __iomem *d64 = dst;
         uint64_t *s64 = src;
         iowrite64(*s64, d64);
@@ -111,7 +111,7 @@ static inline void iowrite16by(void *src, volatile void __iomem *dst)
 
 static inline void ioread32by(void *dst, const volatile void __iomem *src)
 {
-    if (zhpe_no_avx) {  /* Revisit: workaround */
+    if (zhpe_offloaded_no_avx) {  /* Revisit: workaround */
         uint64_t *d64 = dst;
         const volatile uint64_t __iomem *s64 = src;
         *d64 = ioread64(s64);
@@ -132,7 +132,7 @@ static inline void ioread32by(void *dst, const volatile void __iomem *src)
 
 static inline void iowrite32by(void *src, volatile void __iomem *dst)
 {
-    if (zhpe_no_avx) {  /* Revisit: workaround */
+    if (zhpe_offloaded_no_avx) {  /* Revisit: workaround */
         volatile uint64_t __iomem *d64 = dst;
         uint64_t *s64 = src;
         iowrite64(*s64, d64);
@@ -155,27 +155,27 @@ static inline void iowrite32by(void *src, volatile void __iomem *dst)
 #define GCID_STRING_LEN 8
 
 /* tentative definitions */
-struct zhpe_pte_info;
-struct zhpe_rmr;
+struct zhpe_offloaded_pte_info;
+struct zhpe_offloaded_rmr;
 
-char *zhpe_gcid_str(const uint32_t gcid, char *str, const size_t len);
-void zhpe_zmmu_setup_slice(struct slice *sl);
-void zhpe_zmmu_clear_slice(struct slice *sl);
-void zhpe_zmmu_clear_all(struct bridge *br, bool free_radix_tree);
-int zhpe_zmmu_req_page_grid_alloc(struct bridge *br,
+char *zhpe_offloaded_gcid_str(const uint32_t gcid, char *str, const size_t len);
+void zhpe_offloaded_zmmu_setup_slice(struct slice *sl);
+void zhpe_offloaded_zmmu_clear_slice(struct slice *sl);
+void zhpe_offloaded_zmmu_clear_all(struct bridge *br, bool free_radix_tree);
+int zhpe_offloaded_zmmu_req_page_grid_alloc(struct bridge *br,
                                   struct sw_page_grid *sw_pg);
-uint64_t zhpe_zmmu_pte_addr(const struct zhpe_pte_info *info);
-int zhpe_zmmu_req_pte_alloc(struct zhpe_rmr *rmr, uint64_t *req_addr,
+uint64_t zhpe_offloaded_zmmu_pte_addr(const struct zhpe_offloaded_pte_info *info);
+int zhpe_offloaded_zmmu_req_pte_alloc(struct zhpe_offloaded_rmr *rmr, uint64_t *req_addr,
                             uint32_t *pg_ps);
-void zhpe_zmmu_req_pte_free(struct zhpe_rmr *rmr);
-int zhpe_zmmu_rsp_page_grid_alloc(struct bridge *br,
+void zhpe_offloaded_zmmu_req_pte_free(struct zhpe_offloaded_rmr *rmr);
+int zhpe_offloaded_zmmu_rsp_page_grid_alloc(struct bridge *br,
                                   struct sw_page_grid *sw_pg);
-int zhpe_zmmu_rsp_pte_alloc(struct zhpe_pte_info *info, uint64_t *rsp_zaddr,
+int zhpe_offloaded_zmmu_rsp_pte_alloc(struct zhpe_offloaded_pte_info *info, uint64_t *rsp_zaddr,
                             uint32_t *pg_ps);
-void zhpe_zmmu_rsp_pte_free(struct zhpe_pte_info *info);
-void zhpe_zmmu_rsp_take_snapshot(struct bridge *br);
+void zhpe_offloaded_zmmu_rsp_pte_free(struct zhpe_offloaded_pte_info *info);
+void zhpe_offloaded_zmmu_rsp_take_snapshot(struct bridge *br);
 
-int zhpe_user_req_ZMMU_REG(struct io_entry *entry);
-int zhpe_user_req_ZMMU_FREE(struct io_entry *entry);
+int zhpe_offloaded_user_req_ZMMU_REG(struct io_entry *entry);
+int zhpe_offloaded_user_req_ZMMU_FREE(struct io_entry *entry);
 
-#endif /* _ZHPE_ZMMU_H_ */
+#endif /* _ZHPE_OFFLOADED_ZMMU_H_ */

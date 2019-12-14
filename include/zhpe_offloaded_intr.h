@@ -34,23 +34,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_RKEY_H_
-#define _ZHPE_RKEY_H_
+#ifndef _ZHPE_OFFLOADED_INTR_H_
+#define _ZHPE_OFFLOADED_INTR_H_
 
-#define RKEY_RKD_SHIFT    20
-#define RKEY_TOTAL        BIT(RKEY_RKD_SHIFT)
-#define RKEY_OS_MASK      (RKEY_TOTAL - 1)
-#define RKEY_RKD_MASK     (~RKEY_OS_MASK)
+/* Function Prototypes */
+int zhpe_offloaded_register_interrupts(struct pci_dev *pdev, struct slice *sl);
+void zhpe_offloaded_free_interrupts(struct pci_dev *pdev);
+int zhpe_offloaded_get_irq_index(struct slice *sl, int queue);
+irqreturn_t zhpe_offloaded_rdm_interrupt_handler(int irq_index, void *data);
+int zhpe_offloaded_register_rdm_interrupt(struct slice *sl, int queue,
+	irqreturn_t (*intr_handler)(int, void *), void *data);
+void zhpe_offloaded_unregister_rdm_interrupt(struct slice *sl, int queue);
+int zhpe_offloaded_setup_poll_devs(void);
+void zhpe_offloaded_cleanup_poll_devs(void);
+int zhpe_offloaded_poll_device_create(struct slice *sl, int num_vectors);
+void zhpe_offloaded_poll_device_destroy(struct slice *sl);
+wait_queue_head_t * zhpe_offloaded_poll_get_wq(int irq_index);
+int zhpe_offloaded_trigger(int irq_index, int * triggered);
+int zhpe_offloaded_read_handled(struct file_data *fdata, struct slice *sl, int queue,
+    int *handled);
+void zhpe_offloaded_poll_init_waitqueues(struct bridge *br);
 
-#define GENZ_DEFAULT_RKEY 0
-#define ZHPE_UNUSED_RKEY  0x00100000  /* RKD 1, key 0 */
-
-extern uint zhpe_no_rkeys;
-
-void zhpe_rkey_init(void);
-void zhpe_rkey_exit(void);
-void zhpe_rkey_print_all(void);
-int zhpe_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey);
-void zhpe_rkey_free(uint32_t ro_rkey, uint32_t rw_rkey);
-
-#endif /* _ZHPE_RKEY_H_ */
+#endif /* _ZHPE_OFFLOADED_OFFLOADED_INTR_H_ */

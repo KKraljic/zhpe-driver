@@ -34,8 +34,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_UUID_H_
-#define _ZHPE_UUID_H_
+#ifndef _ZHPE_OFFLOADED_UUID_H_
+#define _ZHPE_OFFLOADED_UUID_H_
 
 enum uuid_type {
     UUID_TYPE_LOCAL    = 0x1,
@@ -75,49 +75,49 @@ struct uuid_node {
     struct rb_root      un_rmr_tree;
 };
 
-extern spinlock_t zhpe_uuid_rbtree_lock;
+extern spinlock_t zhpe_offloaded_uuid_rbtree_lock;
 
-int zhpe_user_req_UUID_IMPORT(struct io_entry *entry);
-int zhpe_user_req_UUID_FREE(struct io_entry *entry);
-int zhpe_free_local_uuid(struct file_data *fdata, bool teardown);
-void zhpe_generate_uuid(struct bridge *bridge, uuid_t *uuid);
-char *zhpe_uuid_str(const uuid_t *uuid, char *str, const size_t len);
-int zhpe_free_uuid_node(struct file_data *fdata, spinlock_t *lock,
+int zhpe_offloaded_user_req_UUID_IMPORT(struct io_entry *entry);
+int zhpe_offloaded_user_req_UUID_FREE(struct io_entry *entry);
+int zhpe_offloaded_free_local_uuid(struct file_data *fdata, bool teardown);
+void zhpe_offloaded_generate_uuid(struct bridge *bridge, uuid_t *uuid);
+char *zhpe_offloaded_uuid_str(const uuid_t *uuid, char *str, const size_t len);
+int zhpe_offloaded_free_uuid_node(struct file_data *fdata, spinlock_t *lock,
                         struct rb_root *root, uuid_t *uuid, bool force);
-void zhpe_free_remote_uuids(struct file_data *fdata);
-void zhpe_uuid_tracker_free(struct kref *ref);
-void zhpe_notify_remote_uuids(struct file_data *fdata);
-int zhpe_teardown_remote_uuid(uuid_t *src_uuid);
-struct uuid_tracker *zhpe_uuid_tracker_alloc(uuid_t *uuid, uint type,
+void zhpe_offloaded_free_remote_uuids(struct file_data *fdata);
+void zhpe_offloaded_uuid_tracker_free(struct kref *ref);
+void zhpe_offloaded_notify_remote_uuids(struct file_data *fdata);
+int zhpe_offloaded_teardown_remote_uuid(uuid_t *src_uuid);
+struct uuid_tracker *zhpe_offloaded_uuid_tracker_alloc(uuid_t *uuid, uint type,
                                              gfp_t alloc_flags, int *status);
-struct uuid_tracker *zhpe_uuid_tracker_insert(struct uuid_tracker *uu,
+struct uuid_tracker *zhpe_offloaded_uuid_tracker_insert(struct uuid_tracker *uu,
                                                int *status);
-struct uuid_node *zhpe_remote_uuid_get(struct file_data *fdata,
+struct uuid_node *zhpe_offloaded_remote_uuid_get(struct file_data *fdata,
                                        uuid_t *uuid);
-struct uuid_node *zhpe_remote_uuid_insert(spinlock_t *lock,
+struct uuid_node *zhpe_offloaded_remote_uuid_insert(spinlock_t *lock,
                                           struct rb_root *root,
                                           struct uuid_node *node);
-struct uuid_tracker *zhpe_uuid_search(uuid_t *uuid);
-uint32_t zhpe_gcid_from_uuid(const uuid_t *uuid);
-void zhpe_uuid_exit(void);
+struct uuid_tracker *zhpe_offloaded_uuid_search(uuid_t *uuid);
+uint32_t zhpe_offloaded_gcid_from_uuid(const uuid_t *uuid);
+void zhpe_offloaded_uuid_exit(void);
 
-static inline bool zhpe_remote_uuid_empty(struct file_data *fdata)
+static inline bool zhpe_offloaded_remote_uuid_empty(struct file_data *fdata)
 {
     return RB_EMPTY_ROOT(&fdata->fd_remote_uuid_tree);
 }
 
-static inline bool zhpe_uu_remote_uuid_empty(struct file_data *fdata)
+static inline bool zhpe_offloaded_uu_remote_uuid_empty(struct file_data *fdata)
 {
     return (!fdata->local_uuid ||
             RB_EMPTY_ROOT(&fdata->local_uuid->local->uu_remote_uuid_tree));
 }
 
-static inline bool zhpe_unode_rmr_empty(struct uuid_node *node)
+static inline bool zhpe_offloaded_unode_rmr_empty(struct uuid_node *node)
 {
     return RB_EMPTY_ROOT(&node->un_rmr_tree);
 }
 
-static inline int zhpe_uuid_cmp(const uuid_t *u1, const uuid_t *u2)
+static inline int zhpe_offloaded_uuid_cmp(const uuid_t *u1, const uuid_t *u2)
 {
     /* this must sort all UUIDs for a given GCID together, which it does
      * because the GCID is in the first 28 bits.
@@ -125,31 +125,31 @@ static inline int zhpe_uuid_cmp(const uuid_t *u1, const uuid_t *u2)
     return memcmp(u1, u2, sizeof(uuid_t));
 }
 
-static inline bool zhpe_uuid_is_local(struct bridge *br, uuid_t *uuid)
+static inline bool zhpe_offloaded_uuid_is_local(struct bridge *br, uuid_t *uuid)
 {
-    return zhpe_gcid_from_uuid(uuid) == br->gcid;
+    return zhpe_offloaded_gcid_from_uuid(uuid) == br->gcid;
 }
 
-static inline void zhpe_uuid_remove(struct uuid_tracker *uu)
+static inline void zhpe_offloaded_uuid_remove(struct uuid_tracker *uu)
 {
     bool  gone;
     ulong flags;
     char  uustr[UUID_STRING_LEN+1];
 
-    zhpe_uuid_str(&uu->uuid, uustr, sizeof(uustr));
-    spin_lock_irqsave(&zhpe_uuid_rbtree_lock, flags);
-    gone = kref_put(&uu->refcount, zhpe_uuid_tracker_free);
+    zhpe_offloaded_uuid_str(&uu->uuid, uustr, sizeof(uustr));
+    spin_lock_irqsave(&zhpe_offloaded_uuid_rbtree_lock, flags);
+    gone = kref_put(&uu->refcount, zhpe_offloaded_uuid_tracker_free);
     if (gone)
         debug(DEBUG_UUID, "%s:%s,%u:freed uuid=%s\n",
-              zhpe_driver_name, __func__, __LINE__, uustr);
+              zhpe_offloaded_driver_name, __func__, __LINE__, uustr);
     else
         debug(DEBUG_UUID, "%s:%s,%u:removed uuid=%s, refcount=%u\n",
-              zhpe_driver_name, __func__, __LINE__, uustr,
+              zhpe_offloaded_driver_name, __func__, __LINE__, uustr,
               kref_read(&uu->refcount));
-    spin_unlock_irqrestore(&zhpe_uuid_rbtree_lock, flags);
+    spin_unlock_irqrestore(&zhpe_offloaded_uuid_rbtree_lock, flags);
 }
 
-static inline struct uuid_tracker *zhpe_uuid_tracker_alloc_and_insert(
+static inline struct uuid_tracker *zhpe_offloaded_uuid_tracker_alloc_and_insert(
     uuid_t *uuid,
     uint type,
     uint32_t uu_flags,
@@ -159,7 +159,7 @@ static inline struct uuid_tracker *zhpe_uuid_tracker_alloc_and_insert(
 {
     struct uuid_tracker *uu;
 
-    uu = zhpe_uuid_tracker_alloc(uuid, type, alloc_flags, status);
+    uu = zhpe_offloaded_uuid_tracker_alloc(uuid, type, alloc_flags, status);
     if (uu) {
         if (type & UUID_TYPE_LOCAL) {
             uu->local->fdata = fdata;
@@ -172,13 +172,13 @@ static inline struct uuid_tracker *zhpe_uuid_tracker_alloc_and_insert(
             spin_lock_init(&uu->remote->local_uuid_lock);
         }
 
-        uu = zhpe_uuid_tracker_insert(uu, status);
+        uu = zhpe_offloaded_uuid_tracker_insert(uu, status);
     }
 
     return uu;
 }
 
-static inline struct uuid_node *zhpe_remote_uuid_alloc_and_insert(
+static inline struct uuid_node *zhpe_offloaded_remote_uuid_alloc_and_insert(
     struct uuid_tracker *uu,
     spinlock_t *lock,
     struct rb_root *root,
@@ -195,7 +195,7 @@ static inline struct uuid_node *zhpe_remote_uuid_alloc_and_insert(
     }
     node->tracker = uu;
     node->un_rmr_tree = RB_ROOT;
-    found = zhpe_remote_uuid_insert(lock, root, node);
+    found = zhpe_offloaded_remote_uuid_insert(lock, root, node);
     if (found != node) {  /* already there */
         do_kfree(node);
         ret = -EEXIST;
@@ -207,4 +207,4 @@ static inline struct uuid_node *zhpe_remote_uuid_alloc_and_insert(
     *status = ret;
     return node;
 }
-#endif /* _ZHPE_UUID_H_ */
+#endif /* _ZHPE_OFFLOADED_UUID_H_ */

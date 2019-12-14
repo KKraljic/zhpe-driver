@@ -36,27 +36,27 @@
 
 #include <linux/kernel.h>
 #include <linux/idr.h>
-#include "zhpe.h"
-#include "zhpe_driver.h"
+#include "zhpe_offlaoded.h"
+#include "zhpe_offloaded_driver.h"
 
-static struct ida zhpe_pasid_ida;
+static struct ida zhpe_offloaded_pasid_ida;
 
-void zhpe_pasid_init(void)
+void zhpe_offloaded_pasid_init(void)
 {
-    ida_init(&zhpe_pasid_ida);
+    ida_init(&zhpe_offloaded_pasid_ida);
 }
 
-void zhpe_pasid_exit(void)
+void zhpe_offloaded_pasid_exit(void)
 {
-    ida_destroy(&zhpe_pasid_ida);
+    ida_destroy(&zhpe_offloaded_pasid_ida);
 }
 
-int zhpe_pasid_alloc(unsigned int *pasid)
+int zhpe_offloaded_pasid_alloc(unsigned int *pasid)
 {
     int ret;
 
     /* this function does memory allocation, and might sleep */
-    ret = ida_simple_get(&zhpe_pasid_ida, 1, ZHPE_NUM_PASIDS, GFP_KERNEL);
+    ret = ida_simple_get(&zhpe_offloaded_pasid_ida, 1, ZHPE_OFFLOADED_NUM_PASIDS, GFP_KERNEL);
     if (ret < 0)
         return ret;
 
@@ -64,7 +64,7 @@ int zhpe_pasid_alloc(unsigned int *pasid)
     return 0;
 }
 
-void zhpe_pasid_free(unsigned int pasid)
+void zhpe_offloaded_pasid_free(unsigned int pasid)
 {
-    ida_simple_remove(&zhpe_pasid_ida, pasid);
+    ida_simple_remove(&zhpe_offloaded_pasid_ida, pasid);
 }

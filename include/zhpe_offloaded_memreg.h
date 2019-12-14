@@ -34,8 +34,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_MEMREG_H_
-#define _ZHPE_MEMREG_H_
+#ifndef _ZHPE_OFFLOADED_MEMREG_H_
+#define _ZHPE_OFFLOADED_MEMREG_H_
 
 #include <linux/dma-mapping.h>
 #include <linux/scatterlist.h>
@@ -43,9 +43,9 @@
 
 /* tentative definitions */
 struct sw_page_grid;
-struct zhpe_uuid_tracker;
+struct zhpe_offloaded_uuid_tracker;
 
-struct zhpe_pte_info {
+struct zhpe_offloaded_pte_info {
     struct file_data      *fdata;
     uint64_t              addr;
     uint64_t              access;
@@ -59,8 +59,8 @@ struct zhpe_pte_info {
     struct rb_node        node;  /* within pgi->pte_tree */
 };
 
-struct zhpe_umem {
-    struct zhpe_pte_info  pte_info;
+struct zhpe_offloaded_umem {
+    struct zhpe_offloaded_pte_info  pte_info;
     struct rb_node        node;  /* within fdata->mr_tree */
     struct kref           refcount;
     uint64_t              vaddr;
@@ -79,8 +79,8 @@ struct zhpe_umem {
     int                   npages;
 };
 
-struct zhpe_rmr {
-    struct zhpe_pte_info  pte_info;
+struct zhpe_offloaded_rmr {
+    struct zhpe_offloaded_pte_info  pte_info;
     struct rb_node        fd_node;  /* within fdata->fd_rmr_tree */
     struct rb_node        un_node;  /* within fdata->fd_remote_uuid_tree->un_rmr_tree */
     struct kref           refcount;
@@ -97,21 +97,21 @@ struct zhpe_rmr {
     bool                  un_erase;
 };
 
-void zhpe_rmr_remove_unode(struct file_data *fdata, struct uuid_node *unode);
-void zhpe_rmr_free_all(struct file_data *fdata);
-void zhpe_umem_free_all(struct file_data *fdata);
-int zhpe_user_req_MR_REG(struct io_entry *entry);
-int zhpe_user_req_MR_FREE(struct io_entry *entry);
-int zhpe_user_req_RMR_IMPORT(struct io_entry *entry);
-int zhpe_user_req_RMR_FREE(struct io_entry *entry);
+void zhpe_offloaded_rmr_remove_unode(struct file_data *fdata, struct uuid_node *unode);
+void zhpe_offloaded_rmr_free_all(struct file_data *fdata);
+void zhpe_offloaded_umem_free_all(struct file_data *fdata);
+int zhpe_offloaded_user_req_MR_REG(struct io_entry *entry);
+int zhpe_offloaded_user_req_MR_FREE(struct io_entry *entry);
+int zhpe_offloaded_user_req_RMR_IMPORT(struct io_entry *entry);
+int zhpe_offloaded_user_req_RMR_FREE(struct io_entry *entry);
 
-static inline bool zhpe_umem_empty(struct file_data *fdata)
+static inline bool zhpe_offloaded_umem_empty(struct file_data *fdata)
 {
     return RB_EMPTY_ROOT(&fdata->mr_tree);
 }
 
-static inline bool zhpe_rmr_empty(struct file_data *fdata)
+static inline bool zhpe_offloaded_rmr_empty(struct file_data *fdata)
 {
     return RB_EMPTY_ROOT(&fdata->fd_rmr_tree);
 }
-#endif /* _ZHPE_MEMREG_H_ */
+#endif /* _ZHPE_OFFLOADED_MEMREG_H_ */

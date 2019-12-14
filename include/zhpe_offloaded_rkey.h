@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Hewlett Packard Enterprise Development LP.
+ * Copyright (C) 2018 Hewlett Packard Enterprise Development LP.
  * All rights reserved.
  *
  * This software is available to you under a choice of one of two
@@ -34,16 +34,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_EXTERNC_H_
-#define _ZHPE_EXTERNC_H_
+#ifndef _ZHPE_OFFLOADED_RKEY_H_
+#define _ZHPE_OFFLOADED_RKEY_H_
 
-/* Do extern "C" without goofing up emacs. */
-#ifdef  __cplusplus
-#define _EXTERN_C_BEG extern "C" {
-#define _EXTERN_C_END }
-#else
-#define _EXTERN_C_BEG
-#define _EXTERN_C_END
-#endif
+#define RKEY_RKD_SHIFT    20
+#define RKEY_TOTAL        BIT(RKEY_RKD_SHIFT)
+#define RKEY_OS_MASK      (RKEY_TOTAL - 1)
+#define RKEY_RKD_MASK     (~RKEY_OS_MASK)
 
-#endif /* _ZHPE_EXTERNC_H_ */
+#define GENZ_DEFAULT_RKEY 0
+#define ZHPE_OFFLOADED_UNUSED_RKEY  0x00100000  /* RKD 1, key 0 */
+
+extern uint zhpe_offloaded_no_rkeys;
+
+void zhpe_offloaded_rkey_init(void);
+void zhpe_offloaded_rkey_exit(void);
+void zhpe_offloaded_rkey_print_all(void);
+int zhpe_offloaded_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey);
+void zhpe_offloaded_rkey_free(uint32_t ro_rkey, uint32_t rw_rkey);
+
+#endif /* _ZHPE_OFFLOADED_RKEY_H_ */

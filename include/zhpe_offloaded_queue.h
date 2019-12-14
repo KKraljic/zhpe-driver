@@ -34,8 +34,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_QUEUE_H_
-#define _ZHPE_QUEUE_H_
+#ifndef _ZHPE_OFFLOADED_QUEUE_H_
+#define _ZHPE_OFFLOADED_QUEUE_H_
 
 #include <linux/bitmap.h>
 #include <linux/kernel.h>
@@ -132,36 +132,36 @@ static inline uint64_t rdm_qcm_read(struct rdm_qcm *hw_qcm_addr,
 }
 
 /* Function Prototypes */
-int zhpe_user_req_XQFREE(struct io_entry *entry);
-int zhpe_user_req_XQALLOC(struct io_entry *entry);
-int zhpe_user_req_RQFREE(struct io_entry *entry);
-int zhpe_user_req_RQALLOC(struct io_entry *entry);
-int zhpe_req_XQALLOC(struct zhpe_req_XQALLOC *req,
-			struct zhpe_rsp_XQALLOC	*rsp,
+int zhpe_offloaded_user_req_XQFREE(struct io_entry *entry);
+int zhpe_offloaded_user_req_XQALLOC(struct io_entry *entry);
+int zhpe_offloaded_user_req_RQFREE(struct io_entry *entry);
+int zhpe_offloaded_user_req_RQALLOC(struct io_entry *entry);
+int zhpe_offloaded_req_XQALLOC(struct zhpe_offloaded_req_XQALLOC *req,
+			struct zhpe_offloaded_rsp_XQALLOC	*rsp,
 			struct file_data *fdata);
-int zhpe_req_XQFREE(union zhpe_req *req, 
-			union zhpe_rsp *rsp, struct file_data *fdata);
-int zhpe_req_RQALLOC(struct zhpe_req_RQALLOC *req,
-			struct zhpe_rsp_RQALLOC *rsp, struct file_data *fdata);
-int zhpe_req_RQFREE(struct zhpe_req_RQFREE *req, struct zhpe_rsp_RQFREE *rsp,
+int zhpe_offloaded_req_XQFREE(union zhpe_offloaded_req *req,
+			union zhpe_offloaded_rsp *rsp, struct file_data *fdata);
+int zhpe_offloaded_req_RQALLOC(struct zhpe_offloaded_req_RQALLOC *req,
+			struct zhpe_offloaded_rsp_RQALLOC *rsp, struct file_data *fdata);
+int zhpe_offloaded_req_RQFREE(struct zhpe_offloaded_req_RQFREE *req, struct zhpe_offloaded_rsp_RQFREE *rsp,
 			struct file_data *fdata);
-int zhpe_kernel_XQALLOC(struct xdm_info *xdmi);
-int zhpe_kernel_RQALLOC(struct rdm_info *rdmi);
-int zhpe_kernel_XQFREE(struct xdm_info *xdmi);
-int zhpe_kernel_RQFREE(struct rdm_info *rdmi);
-void zhpe_xqueue_init(struct slice *sl);
-void zhpe_rqueue_init(struct slice *sl);
+int zhpe_offloaded_kernel_XQALLOC(struct xdm_info *xdmi);
+int zhpe_offloaded_kernel_RQALLOC(struct rdm_info *rdmi);
+int zhpe_offloaded_kernel_XQFREE(struct xdm_info *xdmi);
+int zhpe_offloaded_kernel_RQFREE(struct rdm_info *rdmi);
+void zhpe_offloaded_xqueue_init(struct slice *sl);
+void zhpe_offloaded_rqueue_init(struct slice *sl);
 int free_xqueue(
 	struct io_entry *entry,
-	struct zhpe_req_XQFREE * free_req,
-	struct zhpe_rsp_XQFREE * free_rsp);
-int zhpe_clear_xdm_qcm(struct xdm_qcm * xdm_qcm_base);
-int zhpe_clear_rdm_qcm(struct rdm_qcm * rdm_qcm_base);
-void zhpe_release_owned_xdm_queues(struct file_data *fdata);
-void zhpe_release_owned_rdm_queues(struct file_data *fdata);
-int zhpe_rdm_queue_to_irq(int queue, struct slice *sl);
-int zhpe_rdm_queue_to_vector(int queue, struct slice *sl);
-void zhpe_debug_xdm_qcm(const char *func, uint line, const void *cqcm);
-void zhpe_debug_rdm_qcm(const char *func, uint line, const void *cqcm);
+	struct zhpe_offloaded_req_XQFREE * free_req,
+	struct zhpe_offloaded_rsp_XQFREE * free_rsp);
+int zhpe_offloaded_clear_xdm_qcm(struct xdm_qcm * xdm_qcm_base);
+int zhpe_offloaded_clear_rdm_qcm(struct rdm_qcm * rdm_qcm_base);
+void zhpe_offloaded_release_owned_xdm_queues(struct file_data *fdata);
+void zhpe_offloaded_release_owned_rdm_queues(struct file_data *fdata);
+int zhpe_offloaded_rdm_queue_to_irq(int queue, struct slice *sl);
+int zhpe_offloaded_rdm_queue_to_vector(int queue, struct slice *sl);
+void zhpe_offloaded_debug_xdm_qcm(const char *func, uint line, const void *cqcm);
+void zhpe_offloaded_debug_rdm_qcm(const char *func, uint line, const void *cqcm);
 
-#endif /* _ZHPE_DRIVER_H_ */
+#endif /* _ZHPE_OFFLOADED_DRIVER_H_ */

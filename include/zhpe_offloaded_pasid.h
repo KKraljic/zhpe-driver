@@ -34,25 +34,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZHPE_INTR_H_
-#define _ZHPE_INTR_H_
+#ifndef _ZHPE_OFFLOADED_PASID_H_
+#define _ZHPE_OFFLOADED_PASID_H_
 
-/* Function Prototypes */
-int zhpe_register_interrupts(struct pci_dev *pdev, struct slice *sl);
-void zhpe_free_interrupts(struct pci_dev *pdev);
-int zhpe_get_irq_index(struct slice *sl, int queue);
-irqreturn_t zhpe_rdm_interrupt_handler(int irq_index, void *data);
-int zhpe_register_rdm_interrupt(struct slice *sl, int queue,
-	irqreturn_t (*intr_handler)(int, void *), void *data);
-void zhpe_unregister_rdm_interrupt(struct slice *sl, int queue);
-int zhpe_setup_poll_devs(void);
-void zhpe_cleanup_poll_devs(void);
-int zhpe_poll_device_create(struct slice *sl, int num_vectors);
-void zhpe_poll_device_destroy(struct slice *sl);
-wait_queue_head_t * zhpe_poll_get_wq(int irq_index);
-int zhpe_trigger(int irq_index, int * triggered);
-int zhpe_read_handled(struct file_data *fdata, struct slice *sl, int queue,
-    int *handled);
-void zhpe_poll_init_waitqueues(struct bridge *br);
+#define ZHPE_OFFLOADED_NUM_PASIDS  BIT(16)
+#define NO_PASID         0
 
-#endif /* _ZHPE_INTR_H_ */
+void zhpe_offloaded_pasid_init(void);
+void zhpe_offloaded_pasid_exit(void);
+int zhpe_offloaded_pasid_alloc(unsigned int *pasid);
+void zhpe_offloaded_pasid_free(unsigned int pasid);
+
+#endif /* _ZHPE_OFFLOADED_PASID_H_ */

@@ -3,7 +3,7 @@ set -e
 
 # dkms_post_remove.sh
 
-HNAME="zhpe_helper"
+HNAME="zhpe_offloaded_helper"
 HDIR="/usr/local/libexec"   # optional on Debian/Ubuntu
 HPATH="${HDIR}/${HNAME}"
 PPATH="/etc/modprobe.d/zhpe.conf"
