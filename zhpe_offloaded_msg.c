@@ -48,16 +48,19 @@ static atomic_t msgid = ATOMIC_INIT(0);
 
 static inline ktime_t get_timeout(void)
 {
+    PRINT_DEBUG;
     return ktime_set((zhpe_offloaded_kmsg_timeout > 0 ? zhpe_offloaded_kmsg_timeout : 2), 0);
 }
 
 static inline uint16_t msg_alloc_msgid(void)
 {
+    PRINT_DEBUG;
     return (uint16_t)atomic_inc_return(&msgid);
 }
 
 static struct zhpe_offloaded_msg_state *msg_state_alloc(void)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_msg_state *state;
 
     state = do_kmalloc(sizeof(*state), GFP_KERNEL, true);
@@ -70,6 +73,7 @@ static struct zhpe_offloaded_msg_state *msg_state_alloc(void)
 
 static struct zhpe_offloaded_msg_state *msg_state_search(uint16_t msgid)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_msg_state *state;
     struct rb_node *node;
     struct rb_root *root = &msg_rbtree;
@@ -101,6 +105,7 @@ static struct zhpe_offloaded_msg_state *msg_state_search(uint16_t msgid)
 
 static struct zhpe_offloaded_msg_state *msg_state_insert(struct zhpe_offloaded_msg_state *ms)
 {
+    PRINT_DEBUG;
     struct rb_root *root = &msg_rbtree;
     struct rb_node **new = &root->rb_node, *parent = NULL;
     ulong flags;
@@ -135,6 +140,7 @@ static struct zhpe_offloaded_msg_state *msg_state_insert(struct zhpe_offloaded_m
 
 static void msg_state_free(struct zhpe_offloaded_msg_state *ms)
 {
+    PRINT_DEBUG;
     struct rb_root *root = &msg_rbtree;
     ulong flags;
 
@@ -146,6 +152,7 @@ static void msg_state_free(struct zhpe_offloaded_msg_state *ms)
 
 static int _msg_xdm_get_cmpl(struct xdm_info *xdmi, struct zhpe_offloaded_cq_entry *entry)
 {
+    PRINT_DEBUG;
     int ret = 0;
     uint head, next_head, cmdq_ent, cmpl_index;
     struct zhpe_offloaded_cq_entry *xdm_entry, *next_entry;
@@ -190,6 +197,7 @@ static int _msg_xdm_get_cmpl(struct xdm_info *xdmi, struct zhpe_offloaded_cq_ent
 
 int msg_xdm_get_cmpl(struct xdm_info *xdmi, struct zhpe_offloaded_cq_entry *entry)
 {
+    PRINT_DEBUG;
     int ret;
     ulong flags;
 
@@ -202,6 +210,7 @@ int msg_xdm_get_cmpl(struct xdm_info *xdmi, struct zhpe_offloaded_cq_entry *entr
 static int msg_xdm_queue_cmd(struct xdm_info *xdmi,
                              union zhpe_offloaded_hw_wq_entry *cmd)
 {
+    PRINT_DEBUG;
     int ret = 0, cmpl_ret;
     uint head, tail, next_tail;
     union zhpe_offloaded_hw_wq_entry *xdm_entry;
@@ -259,6 +268,7 @@ static int msg_xdm_queue_cmd(struct xdm_info *xdmi,
 static int msg_rdm_get_cmpl(struct rdm_info *rdmi, struct zhpe_offloaded_rdm_hdr *hdr,
                             union zhpe_offloaded_msg *msg)
 {
+    PRINT_DEBUG;
     int ret = 0;
     uint head, next_head;
     struct zhpe_offloaded_rdm_entry *rdm_entry, *next_entry;
@@ -299,6 +309,7 @@ static int msg_rdm_get_cmpl(struct rdm_info *rdmi, struct zhpe_offloaded_rdm_hdr
 static inline void msg_setup_req_hdr(union zhpe_offloaded_msg *msg,
                                      uint8_t opcode, uint32_t rspctxid)
 {
+    PRINT_DEBUG;
     msg->hdr.version  = ZHPE_OFFLOADED_MSG_VERSION;
     msg->hdr.status   = ZHPE_OFFLOADED_MSG_OK;
     msg->hdr.msgid    = msg_alloc_msgid();
@@ -310,6 +321,7 @@ static inline void msg_setup_rsp_hdr(union zhpe_offloaded_msg *rsp_msg,
                                      union zhpe_offloaded_msg *req_msg,
                                      int8_t status, uint32_t rspctxid)
 {
+    PRINT_DEBUG;
     rsp_msg->hdr.version  = ZHPE_OFFLOADED_MSG_VERSION;
     rsp_msg->hdr.status   = status;
     rsp_msg->hdr.msgid    = req_msg->hdr.msgid;
@@ -321,6 +333,7 @@ static inline int msg_send_cmd(struct xdm_info *xdmi,
                                union zhpe_offloaded_msg *msg,
                                uint32_t dgcid, uint32_t rspctxid)
 {
+    PRINT_DEBUG;
     union zhpe_offloaded_hw_wq_entry cmd = { 0 };
     size_t size;
 
@@ -338,6 +351,7 @@ static int msg_insert_send_cmd(struct xdm_info *xdmi,
                                struct zhpe_offloaded_msg_state *state,
                                uint32_t dgcid, uint32_t rspctxid)
 {
+    PRINT_DEBUG;
     int                     ret;
     union zhpe_offloaded_msg          *req_msg;
     struct zhpe_offloaded_msg_state   *found;
@@ -360,6 +374,7 @@ static int msg_insert_send_cmd(struct xdm_info *xdmi,
 
 static int msg_wait_timeout(struct zhpe_offloaded_msg_state *state, ktime_t timeout)
 {
+    PRINT_DEBUG;
     int ret;
 
     debug(DEBUG_MSG, "%s:%s,%u: waiting for reply to msgid=%u, timeout %lld\n",
@@ -387,11 +402,13 @@ static int msg_wait_timeout(struct zhpe_offloaded_msg_state *state, ktime_t time
 
 static int msg_wait(struct zhpe_offloaded_msg_state *state)
 {
+    PRINT_DEBUG;
     return msg_wait_timeout(state, get_timeout());
 }
 
 void zhpe_offloaded_msg_list_wait(struct list_head *msg_wait_list, ktime_t start)
 {
+    PRINT_DEBUG;
     int                     status = 0;
     ktime_t                 timeout = get_timeout();
     struct zhpe_offloaded_msg_state   *state, *next;
@@ -415,6 +432,7 @@ static int msg_insert_send_cmd_wait(struct xdm_info *xdmi,
                                     struct zhpe_offloaded_msg_state *state,
                                     uint32_t dgcid, uint32_t rspctxid)
 {
+    PRINT_DEBUG;
     int                     ret;
 
     ret = msg_insert_send_cmd(xdmi, state, dgcid, rspctxid);
@@ -431,6 +449,7 @@ static int msg_req_NOP(struct rdm_info *rdmi, struct xdm_info *xdmi,
                        struct zhpe_offloaded_rdm_hdr *req_hdr,
                        union zhpe_offloaded_msg *req_msg)
 {
+    PRINT_DEBUG;
     uint32_t         rspctxid = req_msg->hdr.rspctxid;
     union zhpe_offloaded_msg   rsp_msg = { 0 };
     uint64_t         seq;
@@ -451,6 +470,7 @@ static int msg_req_NOP(struct rdm_info *rdmi, struct xdm_info *xdmi,
 static int msg_rsp_NOP(struct zhpe_offloaded_rdm_hdr *rsp_hdr,
                        union zhpe_offloaded_msg *rsp_msg)
 {
+    PRINT_DEBUG;
     int ret = 0;
     uint32_t rspctxid = rsp_msg->hdr.rspctxid;
     uint64_t seq;
@@ -468,6 +488,7 @@ static int msg_req_UUID_IMPORT(struct rdm_info *rdmi, struct xdm_info *xdmi,
                        struct zhpe_offloaded_rdm_hdr *req_hdr,
                        union zhpe_offloaded_msg *req_msg)
 {
+    PRINT_DEBUG;
     int                    status = ZHPE_OFFLOADED_MSG_OK;
     uint32_t               rspctxid = req_msg->hdr.rspctxid;
     uint32_t               ro_rkey = 0, rw_rkey = 0;
@@ -548,6 +569,7 @@ static int msg_req_UUID_IMPORT(struct rdm_info *rdmi, struct xdm_info *xdmi,
 static int msg_rsp_UUID_IMPORT(struct zhpe_offloaded_rdm_hdr *rsp_hdr,
                                union zhpe_offloaded_msg *rsp_msg)
 {
+    PRINT_DEBUG;
     int                    ret = 0;
     uint32_t               rspctxid = rsp_msg->hdr.rspctxid;
     uuid_t                 *src_uuid = &rsp_msg->rsp.uuid_import.src_uuid;
@@ -571,6 +593,7 @@ static int msg_req_UUID_FREE(struct rdm_info *rdmi, struct xdm_info *xdmi,
                        struct zhpe_offloaded_rdm_hdr *req_hdr,
                        union zhpe_offloaded_msg *req_msg)
 {
+    PRINT_DEBUG;
     int                    status = ZHPE_OFFLOADED_MSG_OK;
     uint32_t               rspctxid = req_msg->hdr.rspctxid;
     uuid_t                 *src_uuid = &req_msg->req.uuid_free.src_uuid;
@@ -633,6 +656,7 @@ static int msg_req_UUID_FREE(struct rdm_info *rdmi, struct xdm_info *xdmi,
 static int msg_rsp_UUID_FREE(struct zhpe_offloaded_rdm_hdr *rsp_hdr,
                              union zhpe_offloaded_msg *rsp_msg)
 {
+    PRINT_DEBUG;
     int                    ret = 0;
     uint32_t               rspctxid = rsp_msg->hdr.rspctxid;
     uuid_t                 *src_uuid = &rsp_msg->rsp.uuid_free.src_uuid;
@@ -655,6 +679,7 @@ static int msg_req_UUID_TEARDOWN(struct rdm_info *rdmi, struct xdm_info *xdmi,
                        struct zhpe_offloaded_rdm_hdr *req_hdr,
                        union zhpe_offloaded_msg *req_msg)
 {
+    PRINT_DEBUG;
     int                    status = ZHPE_OFFLOADED_MSG_OK;
     uint32_t               rspctxid = req_msg->hdr.rspctxid;
     uuid_t                 *src_uuid = &req_msg->req.uuid_teardown.src_uuid;
@@ -687,6 +712,7 @@ static int msg_req_UUID_TEARDOWN(struct rdm_info *rdmi, struct xdm_info *xdmi,
 static int msg_rsp_UUID_TEARDOWN(struct zhpe_offloaded_rdm_hdr *rsp_hdr,
                              union zhpe_offloaded_msg *rsp_msg)
 {
+    PRINT_DEBUG;
     int                    ret = 0;
     uint32_t               rspctxid = rsp_msg->hdr.rspctxid;
     uuid_t                 *src_uuid = &rsp_msg->rsp.uuid_teardown.src_uuid;
@@ -706,6 +732,7 @@ static int msg_req_ERROR(struct rdm_info *rdmi, struct xdm_info *xdmi,
                          struct zhpe_offloaded_rdm_hdr *req_hdr,
                          union zhpe_offloaded_msg *req_msg, int status)
 {
+    PRINT_DEBUG;
     uint32_t               rspctxid;
     uint                   msgid;
     union zhpe_offloaded_msg         rsp_msg = { 0 };
@@ -732,6 +759,7 @@ static int msg_req_ERROR(struct rdm_info *rdmi, struct xdm_info *xdmi,
 
 static irqreturn_t msg_rdm_interrupt_handler(int irq_index, void *data)
 {
+    PRINT_DEBUG;
     struct bridge *br = (struct bridge *)data;
     struct xdm_info *xdmi = &br->msg_xdm;
     struct rdm_info *rdmi = &br->msg_rdm;
@@ -855,6 +883,7 @@ int zhpe_offloaded_msg_send_UUID_IMPORT(struct bridge *br,
                               uuid_t *src_uuid, uuid_t *tgt_uuid,
                               uint32_t *ro_rkey, uint32_t *rw_rkey)
 {
+    PRINT_DEBUG;
     struct xdm_info         *xdmi = &br->msg_xdm;
     struct rdm_info         *rdmi = &br->msg_rdm;
     int                     ret = 0;
@@ -907,6 +936,7 @@ struct zhpe_offloaded_msg_state *zhpe_offloaded_msg_send_UUID_FREE(struct bridge
                                                uuid_t *src_uuid,
                                                uuid_t *tgt_uuid, bool wait)
 {
+    PRINT_DEBUG;
     struct xdm_info         *xdmi = &br->msg_xdm;
     struct rdm_info         *rdmi = &br->msg_rdm;
     int                     ret = 0;
@@ -962,6 +992,7 @@ struct zhpe_offloaded_msg_state *zhpe_offloaded_msg_send_UUID_TEARDOWN(struct br
                                                    uuid_t *src_uuid,
                                                    uuid_t *tgt_uuid)
 {
+    PRINT_DEBUG;
     struct xdm_info         *xdmi = &br->msg_xdm;
     struct rdm_info         *rdmi = &br->msg_rdm;
     int                     ret = 0;
@@ -1008,6 +1039,7 @@ struct zhpe_offloaded_msg_state *zhpe_offloaded_msg_send_UUID_TEARDOWN(struct br
 
 int zhpe_offloaded_msg_qalloc(struct bridge *br)
 {
+    PRINT_DEBUG;
 	int ret = 0;
         struct xdm_info *xdmi = &br->msg_xdm;
         struct rdm_info *rdmi = &br->msg_rdm;
@@ -1060,6 +1092,7 @@ int zhpe_offloaded_msg_qalloc(struct bridge *br)
 
 int zhpe_offloaded_msg_qfree(struct bridge *br)
 {
+    PRINT_DEBUG;
 	int ret = 0;
 
         ret |= zhpe_offloaded_kernel_XQFREE(&br->msg_xdm);

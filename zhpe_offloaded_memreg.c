@@ -47,6 +47,7 @@ static void umem_free(struct zhpe_offloaded_umem *umem);
 static inline int umem_cmp(uint64_t vaddr, uint64_t length, uint64_t access,
                            const struct zhpe_offloaded_umem *u)
 {
+    PRINT_DEBUG;
     int cmp;
     const struct zhpe_offloaded_pte_info *info = &u->pte_info;
 
@@ -63,6 +64,7 @@ static struct zhpe_offloaded_umem *umem_search(struct file_data *fdata,
                                      uint64_t vaddr, uint64_t length,
                                      uint64_t access, uint64_t rsp_zaddr)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_umem *unode;
     struct rb_node *rnode;
     struct rb_root *root = &fdata->mr_tree;
@@ -97,6 +99,7 @@ static struct zhpe_offloaded_umem *umem_search(struct file_data *fdata,
 
 static struct zhpe_offloaded_umem *umem_insert(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_pte_info *info = &umem->pte_info;
     struct file_data *fdata = info->fdata;
     struct rb_root *root = &fdata->mr_tree;
@@ -135,29 +138,34 @@ static struct zhpe_offloaded_umem *umem_insert(struct zhpe_offloaded_umem *umem)
 
 static inline void umem_remove(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     kref_put(&umem->refcount, umem_kref_free);
 }
 
 /* Returns the offset of the umem start relative to the first page */
 static inline int zhpe_offloaded_umem_offset(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     return umem->vaddr & (BIT(umem->page_shift) - 1);
 }
 
 /* Returns the first page of a umem */
 static inline unsigned long zhpe_offloaded_umem_start(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     return umem->vaddr - zhpe_offloaded_umem_offset(umem);
 }
 
 /* Returns the address of the page after the last one of a umem */
 static inline unsigned long zhpe_offloaded_umem_end(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     return ALIGN(umem->vaddr + umem->pte_info.length, BIT(umem->page_shift));
 }
 
 static inline size_t zhpe_offloaded_umem_num_pages(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     return (zhpe_offloaded_umem_end(umem) - zhpe_offloaded_umem_start(umem)) >> umem->page_shift;
 }
 
@@ -174,6 +182,7 @@ static inline int zhpe_offloaded_dma_map_sg_attrs(struct bridge *br,
                                         enum dma_data_direction direction,
                                         unsigned long dma_attrs)
 {
+    PRINT_DEBUG;
     int sl, ret = 0;
 #ifdef HAVE_RHEL
     struct dma_attrs dattrs = {
@@ -213,6 +222,7 @@ static inline void zhpe_offloaded_dma_unmap_sg(struct bridge *br,
                                      struct scatterlist *sg, int nents,
                                      enum dma_data_direction direction)
 {
+    PRINT_DEBUG;
     int sl;
 
     for (sl = 0; sl < SLICES; sl++)
@@ -222,6 +232,7 @@ static inline void zhpe_offloaded_dma_unmap_sg(struct bridge *br,
 
 static void _zhpe_offloaded_umem_release(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     struct file_data   *fdata = umem->pte_info.fdata;
     struct scatterlist *sg;
     struct page        *page;
@@ -256,6 +267,7 @@ get_user_pages_compat(unsigned long start, unsigned long nr_pages,
 		      bool write, bool force, struct page **pages,
 		      struct vm_area_struct **vmas)
 {
+    PRINT_DEBUG;
 #ifdef HAVE_RHEL
     return get_user_pages(current, current->mm, start, nr_pages,
                           write, force, pages, vmas);
@@ -281,6 +293,7 @@ static noinline // Revisit: debug
 struct zhpe_offloaded_umem *zhpe_offloaded_umem_get(struct file_data *fdata, uint64_t vaddr,
                                 size_t size, uint64_t access, bool dmasync)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_umem *umem;
     struct zhpe_offloaded_pte_info *info;
     struct page **page_list;
@@ -455,6 +468,7 @@ struct zhpe_offloaded_umem *zhpe_offloaded_umem_get(struct file_data *fdata, uin
 
 static void umem_free_zmmu(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_pte_info *info = &umem->pte_info;
     uint64_t         access;
     bool             local, remote, cpu_visible, individual;
@@ -474,6 +488,7 @@ static void umem_free_zmmu(struct zhpe_offloaded_umem *umem)
 
 static void umem_free(struct zhpe_offloaded_umem *umem)
 {
+    PRINT_DEBUG;
     _zhpe_offloaded_umem_release(umem);
     put_pid(umem->pid);
     do_kfree(umem);
@@ -481,6 +496,7 @@ static void umem_free(struct zhpe_offloaded_umem *umem)
 
 static void umem_kref_free(struct kref *ref)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_umem *umem = container_of(ref, struct zhpe_offloaded_umem, refcount);
 
     umem_free_zmmu(umem);
@@ -490,6 +506,7 @@ static void umem_kref_free(struct kref *ref)
 
 void zhpe_offloaded_umem_free_all(struct file_data *fdata)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_umem *umem, *next;
     struct zhpe_offloaded_pte_info *info;
     struct rb_root root;
@@ -541,6 +558,7 @@ static inline int rmr_cmp(uint32_t dgcid, uint64_t rsp_zaddr,
                           uint64_t length, uint64_t access,
                           const struct zhpe_offloaded_rmr *r)
 {
+    PRINT_DEBUG;
     int cmp;
     const struct zhpe_offloaded_pte_info *info = &r->pte_info;
 
@@ -561,6 +579,7 @@ static inline int64_t rmr_uu_cmp(uint64_t rsp_zaddr,
                                  struct file_data *fdata,
                                  const struct zhpe_offloaded_rmr *r)
 {
+    PRINT_DEBUG;
     int cmp;
     const struct zhpe_offloaded_pte_info *info = &r->pte_info;
 
@@ -582,6 +601,7 @@ static struct zhpe_offloaded_rmr *rmr_search(struct file_data *fdata,
                                    uint64_t length, uint64_t access,
                                    uint64_t req_addr)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_rmr *rmr;
     struct rb_node *rnode;
     struct rb_root *root = &fdata->fd_rmr_tree;
@@ -615,6 +635,7 @@ static struct zhpe_offloaded_rmr *rmr_search(struct file_data *fdata,
 
 static struct zhpe_offloaded_rmr *rmr_insert(struct zhpe_offloaded_rmr *rmr)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_pte_info *info = &rmr->pte_info;
     struct file_data *fdata = info->fdata;
     struct rb_root *root = &fdata->fd_rmr_tree;
@@ -679,6 +700,7 @@ static struct zhpe_offloaded_rmr *rmr_insert(struct zhpe_offloaded_rmr *rmr)
 
 static void rmr_free(struct kref *ref)
 {
+    PRINT_DEBUG;
     /* caller must already hold fdata->mr_lock */
     struct zhpe_offloaded_rmr *rmr = container_of(ref, struct zhpe_offloaded_rmr, refcount);
     struct zhpe_offloaded_pte_info *info = &rmr->pte_info;
@@ -703,6 +725,7 @@ static void rmr_free(struct kref *ref)
 
 static inline void rmr_remove(struct zhpe_offloaded_rmr *rmr, bool lock)
 {
+    PRINT_DEBUG;
     struct file_data *fdata = rmr->pte_info.fdata;
     ulong flags;
 
@@ -715,6 +738,7 @@ static inline void rmr_remove(struct zhpe_offloaded_rmr *rmr, bool lock)
 
 void zhpe_offloaded_rmr_remove_unode(struct file_data *fdata, struct uuid_node *unode)
 {
+    PRINT_DEBUG;
     struct rb_root *root = &unode->un_rmr_tree;
     struct rb_node *rb, *next;
     struct zhpe_offloaded_rmr *rmr;
@@ -743,6 +767,7 @@ void zhpe_offloaded_rmr_remove_unode(struct file_data *fdata, struct uuid_node *
 
 void zhpe_offloaded_rmr_free_all(struct file_data *fdata)
 {
+    PRINT_DEBUG;
     struct rb_node *rb, *next;
     struct zhpe_offloaded_rmr *rmr;
     struct zhpe_offloaded_pte_info *info;
@@ -773,6 +798,7 @@ void zhpe_offloaded_rmr_free_all(struct file_data *fdata)
 static struct zmap *rmr_zmap_alloc(struct file_data *fdata,
                                    struct zhpe_offloaded_rmr *rmr)
 {
+    PRINT_DEBUG;
     union zpages            *zpages;
     struct zmap             *zmap;
 
@@ -797,6 +823,7 @@ static struct zmap *rmr_zmap_alloc(struct file_data *fdata,
 
 int zhpe_offloaded_user_req_MR_REG(struct io_entry *entry)
 {
+    PRINT_DEBUG;
     union zhpe_offloaded_req          *req = &entry->op.req;
     union zhpe_offloaded_rsp          *rsp = &entry->op.rsp;
     int                     status = 0;
@@ -882,6 +909,7 @@ int zhpe_offloaded_user_req_MR_REG(struct io_entry *entry)
 
 int zhpe_offloaded_user_req_MR_FREE(struct io_entry *entry)
 {
+    PRINT_DEBUG;
     union zhpe_offloaded_req          *req = &entry->op.req;
     union zhpe_offloaded_rsp          *rsp = &entry->op.rsp;
     struct file_data        *fdata = entry->fdata;
@@ -917,6 +945,7 @@ int zhpe_offloaded_user_req_MR_FREE(struct io_entry *entry)
 
 int zhpe_offloaded_user_req_RMR_IMPORT(struct io_entry *entry)
 {
+    PRINT_DEBUG;
     union zhpe_offloaded_req          *req = &entry->op.req;
     union zhpe_offloaded_rsp          *rsp = &entry->op.rsp;
     int                     status = 0;
@@ -1042,6 +1071,7 @@ int zhpe_offloaded_user_req_RMR_IMPORT(struct io_entry *entry)
 
 int zhpe_offloaded_user_req_RMR_FREE(struct io_entry *entry)
 {
+    PRINT_DEBUG;
     union zhpe_offloaded_req          *req = &entry->op.req;
     union zhpe_offloaded_rsp          *rsp = &entry->op.rsp;
     uuid_t                  *uuid = &req->rmr_free.uuid;
@@ -1079,6 +1109,7 @@ int zhpe_offloaded_user_req_RMR_FREE(struct io_entry *entry)
 
 static void zhpe_offloaded_mmun_release(struct mmu_notifier *mn, struct mm_struct *mm)
 {
+    PRINT_DEBUG;
     struct file_data    *fdata = container_of(mn, struct file_data, mmun);
 
     /*
@@ -1094,6 +1125,7 @@ static const struct mmu_notifier_ops zhpe_offloaded_mmun_ops = {
 
 int zhpe_offloaded_mmun_init(struct file_data *fdata)
 {
+    PRINT_DEBUG;
     int                 ret;
     struct mm_struct    *mm = current->mm;
 
@@ -1112,6 +1144,7 @@ int zhpe_offloaded_mmun_init(struct file_data *fdata)
 
 void zhpe_offloaded_mmun_exit(struct file_data *fdata)
 {
+    PRINT_DEBUG;
     if (fdata->mm)
         mmu_notifier_unregister(&fdata->mmun, fdata->mm);
 }

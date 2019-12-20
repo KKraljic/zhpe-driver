@@ -41,6 +41,7 @@
 
 int zhpe_offloaded_get_irq_index(struct slice *sl, int queue)
 {
+    PRINT_DEBUG;
     int vector;
 
     if (!SLICE_VALID(sl)) {
@@ -75,6 +76,7 @@ int zhpe_offloaded_get_irq_index(struct slice *sl, int queue)
 
 irqreturn_t zhpe_offloaded_rdm_interrupt_handler(int irq_index, void *data)
 {
+    PRINT_DEBUG;
     struct bridge *br = (struct bridge *)data;
 
     debug(DEBUG_INTR,
@@ -95,6 +97,7 @@ int zhpe_offloaded_register_rdm_interrupt(struct slice *sl,
 	irqreturn_t (*intr_handler)(int, void *),
 	void *data)
 {
+    PRINT_DEBUG;
     int irq_index;
     int vector;
     struct rdm_vector_list *new_entry;
@@ -133,6 +136,7 @@ int zhpe_offloaded_register_rdm_interrupt(struct slice *sl,
 
 void zhpe_offloaded_unregister_rdm_interrupt(struct slice *sl, int queue)
 {
+    PRINT_DEBUG;
     int vector;
     struct rdm_vector_list *tmp;
     struct list_head *pos, *q;
@@ -159,6 +163,7 @@ void zhpe_offloaded_unregister_rdm_interrupt(struct slice *sl, int queue)
 
 static int zhpe_offloaded_irq_to_vector(int irq, struct slice *sl)
 {
+    PRINT_DEBUG;
     int base_vector = pci_irq_vector(sl->pdev, 0);
     int check;
 
@@ -173,6 +178,7 @@ static int zhpe_offloaded_irq_to_vector(int irq, struct slice *sl)
 
 static irqreturn_t zhpe_offloaded_intr_handler(int irq, void *data_ptr)
 {
+    PRINT_DEBUG;
     struct slice *sl = (struct slice *)data_ptr;
     struct pci_dev *pdev = sl->pdev;
     struct list_head *pos;
@@ -213,7 +219,7 @@ static irqreturn_t zhpe_offloaded_intr_handler(int irq, void *data_ptr)
 
 int zhpe_offloaded_register_interrupts(struct pci_dev *pdev, struct slice *sl)
 {
-
+    PRINT_DEBUG;
 	int ret = 0;
 	int nvec = 0;
 	int i;
@@ -271,6 +277,7 @@ done:
 
 void zhpe_offloaded_free_interrupts(struct pci_dev *pdev)
 {
+    PRINT_DEBUG;
     struct slice *sl = (struct slice *)pci_get_drvdata(pdev);
     int i;
     struct list_head *pos, *q;
@@ -309,6 +316,7 @@ struct slice * zhpe_offloaded_irq_index_to_slice(
 	struct file_data *fdata,
 	int irq_index)
 {
+    PRINT_DEBUG;
 	int slice_id;
 
 	slice_id = irq_index / VECTORS_PER_SLICE;
@@ -317,6 +325,7 @@ struct slice * zhpe_offloaded_irq_index_to_slice(
 
 static int zhpe_offloaded_poll_open(struct inode *inode, struct file *file)
 {
+    PRINT_DEBUG;
     struct file_data *fdata;
     pid_t  pid = task_pid_nr(current);
     struct bridge *br = &zhpe_offloaded_bridge;
@@ -360,12 +369,14 @@ static int zhpe_offloaded_poll_open(struct inode *inode, struct file *file)
 
 static int zhpe_offloaded_poll_close(struct inode *inode, struct file *file)
 {
+    PRINT_DEBUG;
     return 0;
 }
 
 static unsigned int zhpe_offloaded_poll_poll(struct file *file,
     struct poll_table_struct *wait)
 {
+    PRINT_DEBUG;
     struct file_data *fdata = file->private_data;
     int irq_index = iminor(file_inode(file));
     int handled, triggered;
@@ -398,6 +409,7 @@ static const struct file_operations zhpe_offloaded_poll_fops = {
 
 int zhpe_offloaded_poll_device_create(struct slice *sl, int num_vectors)
 {
+    PRINT_DEBUG;
     int d;
     int base_irq_vector;
     struct device * dev;
@@ -429,6 +441,7 @@ destroy_devices:
 
 static int __match_devt(struct device *dev, const void *data)
 {
+        PRINT_DEBUG;
         const dev_t *devt = data;
 
         return dev->devt == *devt;
@@ -436,6 +449,7 @@ static int __match_devt(struct device *dev, const void *data)
 
 void zhpe_offloaded_poll_device_destroy(struct slice *sl)
 {
+    PRINT_DEBUG;
 	int d;
 	int base_irq_vector;
         int minor;
@@ -469,6 +483,7 @@ void zhpe_offloaded_poll_device_destroy(struct slice *sl)
 
 void zhpe_offloaded_poll_init_waitqueues(struct bridge *br)
 {
+    PRINT_DEBUG;
     int i;
 
     /* Initialize wait queues for each poll device */
@@ -479,6 +494,7 @@ void zhpe_offloaded_poll_init_waitqueues(struct bridge *br)
 
 static char *poll_devnode(struct device *dev, umode_t *mode)
 {
+        PRINT_DEBUG;
         if (!mode)
                 return NULL;
         *mode = 0666;
@@ -487,6 +503,7 @@ static char *poll_devnode(struct device *dev, umode_t *mode)
 
 int zhpe_offloaded_setup_poll_devs(void)
 {
+    PRINT_DEBUG;
     int ret = -1;
 
     ret = alloc_chrdev_region(&zhpe_offloaded_poll_dev, 0, MAX_IRQ_VECTORS,
@@ -536,6 +553,7 @@ done:
 
 void zhpe_offloaded_cleanup_poll_devs(void)
 {
+    PRINT_DEBUG;
         int minor;
 
 	for (minor = 0; minor < MAX_IRQ_VECTORS; minor++) {
@@ -548,6 +566,7 @@ void zhpe_offloaded_cleanup_poll_devs(void)
 
 int zhpe_offloaded_trigger(int irq_index, int *triggered)
 {
+    PRINT_DEBUG;
     if (irq_index < 0 || irq_index >= MAX_IRQ_VECTORS) {
         debug(DEBUG_MSG, "zhpe_offloaded_trigger passed an out of range irq_index %d\n",
                 irq_index);

@@ -43,16 +43,19 @@ static struct ida zhpe_offloaded_pasid_ida;
 
 void zhpe_offloaded_pasid_init(void)
 {
+    PRINT_DEBUG;
     ida_init(&zhpe_offloaded_pasid_ida);
 }
 
 void zhpe_offloaded_pasid_exit(void)
 {
+    PRINT_DEBUG;
     ida_destroy(&zhpe_offloaded_pasid_ida);
 }
 
 int zhpe_offloaded_pasid_alloc(unsigned int *pasid)
 {
+    PRINT_DEBUG;
     int ret;
 
     /* this function does memory allocation, and might sleep */
@@ -66,5 +69,6 @@ int zhpe_offloaded_pasid_alloc(unsigned int *pasid)
 
 void zhpe_offloaded_pasid_free(unsigned int pasid)
 {
+    PRINT_DEBUG;
     ida_simple_remove(&zhpe_offloaded_pasid_ida, pasid);
 }

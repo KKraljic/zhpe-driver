@@ -66,6 +66,7 @@ static int rdm_last_used_slice = SLICES-1;
  */
 void zhpe_offloaded_xqueue_init(struct slice *sl)
 {
+    PRINT_DEBUG;
 	spin_lock_init(&sl->xdm_slice_lock);
 	bitmap_zero(sl->xdm_alloced_bitmap, MAX_XDM_QUEUES_PER_SLICE);
 	sl->xdm_alloc_count = 0;
@@ -78,6 +79,7 @@ void zhpe_offloaded_xqueue_init(struct slice *sl)
  */
 void zhpe_offloaded_rqueue_init(struct slice *sl)
 {
+    PRINT_DEBUG;
 	spin_lock_init(&sl->rdm_slice_lock);
 	bitmap_zero(sl->rdm_alloced_bitmap, MAX_RDM_QUEUES_PER_SLICE);
 	sl->rdm_alloc_count = 0;
@@ -110,6 +112,7 @@ static DECLARE_WAIT_QUEUE_HEAD(wqA);
 
 void zhpe_offloaded_debug_xdm_qcm(const char *func, uint line, const void *cqcm)
 {
+    PRINT_DEBUG;
 	void            *qcm = (void *)cqcm;
 	uint            off;
 	uint64_t        cmd_addr;
@@ -149,6 +152,7 @@ void zhpe_offloaded_debug_xdm_qcm(const char *func, uint line, const void *cqcm)
 
 void zhpe_offloaded_debug_rdm_qcm(const char *func, uint line, const void *cqcm)
 {
+    PRINT_DEBUG;
 	void            *qcm = (void *)cqcm;
 	uint            off;
 	uint64_t        cmpl_addr;
@@ -179,6 +183,7 @@ void zhpe_offloaded_debug_rdm_qcm(const char *func, uint line, const void *cqcm)
 
 static int xdm_get_A_bit(struct xdm_qcm *qcm, uint16_t *acc)
 {
+    PRINT_DEBUG;
 	uint64_t a;
 
 	a = xdm_qcm_read(qcm, XDM_A_OFFSET);
@@ -188,6 +193,7 @@ static int xdm_get_A_bit(struct xdm_qcm *qcm, uint16_t *acc)
 
 static int rdm_get_A_bit(struct rdm_qcm *qcm)
 {
+    PRINT_DEBUG;
 	uint64_t a;
 
 	a = rdm_qcm_read(qcm, RDM_A_OFFSET);
@@ -205,6 +211,7 @@ static int rdm_get_A_bit(struct rdm_qcm *qcm)
 #define MSLEEP		3
 static int xdm_wait(struct xdm_qcm *qcm, int wait_type, int wait_time)
 {
+    PRINT_DEBUG;
 	int bail_out = 0;
 	uint16_t acc;
 
@@ -232,6 +239,7 @@ static int xdm_wait(struct xdm_qcm *qcm, int wait_type, int wait_time)
 
 static int xdm_wait_for_active_clear(struct xdm_qcm *qcm)
 {
+    PRINT_DEBUG;
 	int a;
 	uint16_t acc;
 	int wait_time;
@@ -261,6 +269,7 @@ static int xdm_wait_for_active_clear(struct xdm_qcm *qcm)
 
 static int clear_xdm_qcm(struct xdm_qcm *qcm)
 {
+    PRINT_DEBUG;
 	int h;
 	uint64_t junk;
 	int hsr_count;
@@ -285,6 +294,7 @@ static int clear_xdm_qcm(struct xdm_qcm *qcm)
 int zhpe_offloaded_clear_xdm_qcm(
 	struct xdm_qcm * qcm)
 {
+    PRINT_DEBUG;
 	int      q;
 	uint64_t junk;
 
@@ -312,6 +322,7 @@ int zhpe_offloaded_clear_xdm_qcm(
 
 static int clear_rdm_qcm(struct rdm_qcm *qcm)
 {
+    PRINT_DEBUG;
 	int h;
 	int bail_out = 0;
 	uint64_t junk;
@@ -341,6 +352,7 @@ static int clear_rdm_qcm(struct rdm_qcm *qcm)
 int zhpe_offloaded_clear_rdm_qcm(
 	struct rdm_qcm * qcm)
 {
+    PRINT_DEBUG;
 	int      q;
 	uint64_t junk;
 
@@ -369,6 +381,7 @@ int zhpe_offloaded_clear_rdm_qcm(
 static int distribute_irq(unsigned long *alloced_bitmap,
         struct slice *sl, int *vector)
 {
+        PRINT_DEBUG;
         int q;
         int min_vector, min;
         int v;
@@ -414,6 +427,7 @@ static int distribute_irq(unsigned long *alloced_bitmap,
 
 int zhpe_offloaded_rdm_queue_to_vector(int queue, struct slice *sl)
 {
+    PRINT_DEBUG;
 	int vector;
 	int clump_size = MAX_RDM_QUEUES_PER_SLICE / sl->irq_vectors_count;
 
@@ -428,6 +442,7 @@ static int xdm_choose_slice_queue(
 		int           *slice,
 		int           *queue)
 {
+    PRINT_DEBUG;
 	int i;
 	int q;
 	int s = (xdm_last_used_slice + 1) % SLICES;
@@ -470,6 +485,7 @@ static int rdm_choose_slice_queue(
 		int           *queue,
                 int           *irq_vector)
 {
+    PRINT_DEBUG;
 	int i;
 	int q;
 	int s = (rdm_last_used_slice + 1) % SLICES;
@@ -515,6 +531,7 @@ static void xdm_release_slice_queue(
 		int           slice,
 		int           queue)
 {
+    PRINT_DEBUG;
 	struct slice *slices;
 	struct slice *cur_slice;
 
@@ -532,6 +549,7 @@ static void rdm_release_slice_queue(
 		int           slice,
 		int           queue)
 {
+    PRINT_DEBUG;
 	struct slice *slices;
 	struct slice *cur_slice;
 
@@ -551,6 +569,7 @@ static int alloc_xqueue(
 	int     *slice,
 	int     *queue)
 {
+    PRINT_DEBUG;
 	int ret;
 	uint8_t sm;
 
@@ -591,6 +610,7 @@ static int alloc_rqueue(
 	int     *queue,
         int     *irq_vector)
 {
+    PRINT_DEBUG;
 	int ret;
 	uint8_t sm;
 
@@ -628,6 +648,7 @@ static int _xqueue_free(
 	int slice,
 	int queue)
 {
+    PRINT_DEBUG;
 	struct slice     *slices;
 	struct slice     *sl;
 	struct xdm_qcm   *hw_qcm_addr;
@@ -670,6 +691,7 @@ static int zhpe_offloaded_xqueue_free(
 	struct file_data *fdata,
 	struct zhpe_offloaded_req_XQFREE *free_req)
 {
+    PRINT_DEBUG;
 	int              slice = free_req->info.slice;
 	int              queue = free_req->info.queue;
 	int              ret;
@@ -698,6 +720,7 @@ static int _rqueue_free(
 	int slice,
 	int queue)
 {
+    PRINT_DEBUG;
 	struct slice     *sl;
 	struct rdm_qcm   *hw_qcm_addr;
 
@@ -743,6 +766,7 @@ static int zhpe_offloaded_rqueue_free(
 	struct file_data *fdata,
 	struct zhpe_offloaded_req_RQFREE *free_req)
 {
+    PRINT_DEBUG;
 	int              slice = free_req->info.slice;
 	int              queue = free_req->info.queue;
 	int              ret;
@@ -773,6 +797,7 @@ static int zhpe_offloaded_rqueue_free(
 
 void zhpe_offloaded_release_owned_xdm_queues(struct file_data *fdata)
 {
+    PRINT_DEBUG;
 	int ret = 0;
 	int bits = SLICES * zhpe_offloaded_xdm_queues_per_slice;
 	int slice, queue, bit;
@@ -800,6 +825,7 @@ void zhpe_offloaded_release_owned_xdm_queues(struct file_data *fdata)
 
 void zhpe_offloaded_release_owned_rdm_queues(struct file_data *fdata)
 {
+    PRINT_DEBUG;
 	int ret = 0;
 	int bits = SLICES * zhpe_offloaded_rdm_queues_per_slice;
 	int slice, queue, bit;
@@ -832,6 +858,7 @@ static int dma_zalloc_map(
 	union zpages **ret_zpage,
 	struct zmap **ret_zmap)
 {
+    PRINT_DEBUG;
 	int ret = 0;
 
 	*ret_zpage = dma_zpages_alloc(sl, q_size);
@@ -855,6 +882,7 @@ static int dma_zalloc_map(
 
 int zhpe_offloaded_user_req_XQALLOC(struct io_entry *entry)
 {
+    PRINT_DEBUG;
 	int	 		  ret = -EINVAL;
 	struct zhpe_offloaded_rsp_XQALLOC	  rsp;
 
@@ -874,6 +902,7 @@ static void xdm_qcm_setup(struct xdm_qcm *hw_qcm_addr,
                           int traffic_class, int priority,
                           bool cur_valid, uint pasid)
 {
+    PRINT_DEBUG;
 	struct xdm_qcm_header     qcm = { 0 };
 	uint64_t		  junk;
 	int                       offset;
@@ -933,6 +962,7 @@ static int xdm_queue_sizes(uint32_t *cmdq_ent, uint32_t *cmplq_ent,
                            size_t *cmdq_size, size_t *cmplq_size,
                            size_t *qcm_size)
 {
+    PRINT_DEBUG;
 	int ret = 0;
 
 	/* Validate the given queue length */
@@ -979,6 +1009,7 @@ int zhpe_offloaded_req_XQALLOC(
 	struct zhpe_offloaded_rsp_XQALLOC	*rsp,
 	struct file_data        *fdata)
 {
+    PRINT_DEBUG;
 	int	 		  ret;
 	uint32_t                  cmdq_ent, cmplq_ent;
 	struct xdm_qcm            *hw_qcm_addr, *app_qcm_addr;
@@ -1108,6 +1139,7 @@ done:
 
 int zhpe_offloaded_kernel_XQALLOC(struct xdm_info *xdmi)
 {
+    PRINT_DEBUG;
     int ret = 0;
 
     debug(DEBUG_XQUEUE, "%s:%s,%u: cmdq_ent=%u, cmplq_ent=%u\n",
@@ -1164,6 +1196,7 @@ int zhpe_offloaded_kernel_XQALLOC(struct xdm_info *xdmi)
 
 int zhpe_offloaded_user_req_XQFREE(struct io_entry *entry)
 {
+    PRINT_DEBUG;
 	int			ret = 0;
 
 	CHECK_INIT_STATE(entry, ret, done);
@@ -1178,6 +1211,7 @@ done:
 int zhpe_offloaded_req_XQFREE(union zhpe_offloaded_req *req,
 			union zhpe_offloaded_rsp *rsp, struct file_data *fdata)
 {
+    PRINT_DEBUG;
 	int			ret = 0;
 	int			count = 3;
 	struct zmap		*zmap;
@@ -1220,6 +1254,7 @@ int zhpe_offloaded_req_XQFREE(union zhpe_offloaded_req *req,
 
 int zhpe_offloaded_kernel_XQFREE(struct xdm_info *xdmi)
 {
+    PRINT_DEBUG;
     int ret = 0;
 
     if (_xqueue_free(xdmi->br, xdmi->slice, xdmi->queue)) {
@@ -1239,6 +1274,7 @@ int zhpe_offloaded_kernel_XQFREE(struct xdm_info *xdmi)
 #define RSPCTXID_UPPER_SLICE_SHIFT	10
 uint32_t zhpe_offloaded_rspctxid_alloc(int slice, int queue)
 {
+    PRINT_DEBUG;
 	uint32_t rspctxid;
 
 	/* bits 0-1 select the RDM instance in the bridge - use the slice. */
@@ -1251,6 +1287,7 @@ uint32_t zhpe_offloaded_rspctxid_alloc(int slice, int queue)
 
 int zhpe_offloaded_user_req_RQALLOC(struct io_entry *entry)
 {
+    PRINT_DEBUG;
 	int	 		  ret = -EINVAL;
 	struct zhpe_offloaded_req_RQALLOC	  *req = &entry->op.req.rqalloc;
 	struct zhpe_offloaded_rsp_RQALLOC	  rsp;
@@ -1269,6 +1306,7 @@ static void rdm_qcm_setup(struct rdm_qcm *hw_qcm_addr,
                           uint64_t dma_addr, uint cmplq_ent,
                           bool cur_valid, uint pasid)
 {
+    PRINT_DEBUG;
 	struct rdm_qcm_header     qcm = { 0 };
 	uint64_t		  junk;
 	int                       offset;
@@ -1306,6 +1344,7 @@ static void rdm_qcm_setup(struct rdm_qcm *hw_qcm_addr,
 static int rdm_queue_sizes(uint32_t *cmplq_ent, size_t *cmplq_size,
                            size_t *qcm_size)
 {
+    PRINT_DEBUG;
 	int ret = 0;
 
 	/* Validate the given queue length */
@@ -1337,6 +1376,7 @@ int zhpe_offloaded_req_RQALLOC(struct zhpe_offloaded_req_RQALLOC *req,
 			struct zhpe_offloaded_rsp_RQALLOC *rsp,
 			struct file_data *fdata)
 {
+    PRINT_DEBUG;
 	int	 		  ret = -EINVAL;
 	uint32_t                  cmplq_ent;
 	size_t			  qcm_size = 0, cmplq_size = 0;
@@ -1461,6 +1501,7 @@ int zhpe_offloaded_req_RQALLOC(struct zhpe_offloaded_req_RQALLOC *req,
 
 int zhpe_offloaded_kernel_RQALLOC(struct rdm_info *rdmi)
 {
+    PRINT_DEBUG;
     int ret = 0;
 
     debug(DEBUG_RQUEUE, "%s:%s,%u: cmplq_ent=%u, slice_mask 0x%x\n",
@@ -1503,6 +1544,7 @@ int zhpe_offloaded_kernel_RQALLOC(struct rdm_info *rdmi)
 
 int zhpe_offloaded_user_req_RQFREE(struct io_entry *entry)
 {
+    PRINT_DEBUG;
 	int			ret = 0;
 	struct zhpe_offloaded_rsp_RQFREE	rsp;
 
@@ -1518,6 +1560,7 @@ int zhpe_offloaded_req_RQFREE(struct zhpe_offloaded_req_RQFREE *req,
 			struct zhpe_offloaded_rsp_RQFREE *rsp,
 			struct file_data *fdata)
 {
+    PRINT_DEBUG;
 	int			ret = 0;
 	struct zmap		*zmap;
 	struct zmap		*next;
@@ -1558,6 +1601,7 @@ int zhpe_offloaded_req_RQFREE(struct zhpe_offloaded_req_RQFREE *req,
 
 int zhpe_offloaded_kernel_RQFREE(struct rdm_info *rdmi)
 {
+    PRINT_DEBUG;
     int ret = 0;
 
     if (_rqueue_free(rdmi->br, rdmi->slice, rdmi->queue)) {

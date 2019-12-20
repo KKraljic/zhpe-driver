@@ -158,6 +158,7 @@ static bool _expected_saw(const char *callf, uint line,
 
 void _do_kfree(const char *callf, uint line, void *ptr)
 {
+    PRINT_DEBUG;
     size_t              size;
 
     if (!ptr)
@@ -174,6 +175,7 @@ void _do_kfree(const char *callf, uint line, void *ptr)
 void *_do_kmalloc(const char *callf, uint line,
                   size_t size, gfp_t flags, bool zero)
 {
+    PRINT_DEBUG;
     void                *ret, *ptr;
 
     /* kmalloc alignment is sizeof(void *) */
@@ -197,6 +199,7 @@ void *_do_kmalloc(const char *callf, uint line,
 
 void _do_free_pages(const char *callf, uint line, void *ptr, int order)
 {
+    PRINT_DEBUG;
     size_t              size;
     struct page         *page;
 
@@ -216,6 +219,7 @@ void _do_free_pages(const char *callf, uint line, void *ptr, int order)
 void *_do__get_free_pages(const char *callf, uint line,
                           int order, gfp_t flags, bool zero)
 {
+    PRINT_DEBUG;
     void                *ret;
     size_t              size = 1UL << (order + PAGE_SHIFT);
     struct page         *page;
@@ -242,6 +246,7 @@ void *_do__get_free_pages(const char *callf, uint line,
 static inline void _put_io_entry(const char *callf, uint line,
                                  struct io_entry *entry)
 {
+    PRINT_DEBUG;
     int                 count;
 
     if (entry) {
@@ -259,6 +264,7 @@ static inline void _put_io_entry(const char *callf, uint line,
 static inline struct io_entry *_get_io_entry(const char *callf, uint line,
                                              struct io_entry *entry)
 {
+    PRINT_DEBUG;
     int                 count;
 
     if (!entry)
@@ -279,6 +285,7 @@ static inline struct io_entry *_get_io_entry(const char *callf, uint line,
 static void _free_io_lists(const char *callf, uint line,
                            struct file_data *fdata)
 {
+    PRINT_DEBUG;
     struct io_entry     *next;
     struct io_entry     *entry;
     int i = 0;
@@ -301,12 +308,14 @@ static void _free_io_lists(const char *callf, uint line,
 
 static void file_data_free(const char *callf, uint line, void *ptr)
 {
+    PRINT_DEBUG;
     _do_kfree(callf, line, ptr);
 }
 
 static inline void _put_file_data(const char *callf, uint line,
                                   struct file_data *fdata)
 {
+    PRINT_DEBUG;
     int                 count;
 
     if (fdata) {
@@ -324,6 +333,7 @@ static inline void _put_file_data(const char *callf, uint line,
 static inline struct file_data *_get_file_data(const char *callf, uint line,
                                                struct file_data *fdata)
 {
+    PRINT_DEBUG;
     int                 count;
 
     if (!fdata)
@@ -343,6 +353,7 @@ static inline struct file_data *_get_file_data(const char *callf, uint line,
 
 void queue_zpages_free(union zpages *zpages)
 {
+    PRINT_DEBUG;
     size_t              npages;
     size_t              i;
     struct page         *page;
@@ -363,6 +374,7 @@ void queue_zpages_free(union zpages *zpages)
 
 void _zpages_free(const char *callf, uint line, union zpages *zpages)
 {
+    PRINT_DEBUG;
     if (!zpages)
         return;
 
@@ -401,6 +413,7 @@ union zpages *_hsr_zpage_alloc(
 	uint        line,
 	phys_addr_t base_addr)
 {
+    PRINT_DEBUG;
     union zpages       *ret = NULL;
 
     debug(DEBUG_MEM, "%s:%s,%u:%s:page_type HSR_PAGE\n",
@@ -434,6 +447,7 @@ union zpages *_dma_zpages_alloc(
 	struct slice * sl,
 	size_t size)
 {
+    PRINT_DEBUG;
     union zpages       *ret = NULL;
     int                 order = 0;
     size_t              npages;
@@ -476,6 +490,7 @@ union zpages *_dma_zpages_alloc(
 union zpages *shared_zpage_alloc(
 	size_t size, int type)
 {
+    PRINT_DEBUG;
     union zpages       *ret = NULL;
 
     /* Use the queue type alloc to get a zpage */
@@ -497,6 +512,7 @@ union zpages *_queue_zpages_alloc(
 	size_t size,
 	bool contig)
 {
+    PRINT_DEBUG;
     union zpages       *ret = NULL;
     int                 order = 0;
     size_t              npages;
@@ -563,6 +579,7 @@ union zpages *_queue_zpages_alloc(
 union zpages *_rmr_zpages_alloc(const char *callf, uint line,
                                 struct zhpe_offloaded_rmr *rmr)
 {
+    PRINT_DEBUG;
     union zpages       *ret = NULL;
 
     debug(DEBUG_MEM, "%s:%s,%u:%s:page_type RMR_PAGE\n",
@@ -586,6 +603,7 @@ union zpages *_rmr_zpages_alloc(const char *callf, uint line,
 
 void _zmap_free(const char *callf, uint line, struct zmap *zmap)
 {
+    PRINT_DEBUG;
     if (!zmap)
         return;
 
@@ -604,6 +622,7 @@ struct zmap *_zmap_alloc(
 	struct file_data *fdata,
 	union zpages *zpages)
 {
+    PRINT_DEBUG;
     struct zmap         *ret;
     struct zmap         *cur;
     ulong               coff;
@@ -661,6 +680,7 @@ struct zmap *_zmap_alloc(
 bool _free_zmap_list(const char *callf, uint line,
                             struct file_data *fdata)
 {
+    PRINT_DEBUG;
     bool                ret = true;
     struct zmap         *zmap;
     struct zmap         *next;
@@ -689,6 +709,7 @@ static inline void queue_io_entry_locked(struct file_data *fdata,
                                          struct list_head *head,
                                          struct io_entry *entry)
 {
+    PRINT_DEBUG;
     bool                wake = list_empty(head);
 
     list_add_tail(&entry->list, head);
@@ -702,6 +723,7 @@ static inline int queue_io_entry(struct file_data *fdata,
                                  struct list_head *head,
                                  struct io_entry *entry)
 {
+    PRINT_DEBUG;
     int                 ret = 0;
 
     spin_lock(&fdata->io_lock);
@@ -716,6 +738,7 @@ static inline int queue_io_entry(struct file_data *fdata,
 
 static void io_free(const char *callf, uint line, void *ptr)
 {
+    PRINT_DEBUG;
     struct io_entry     *entry = ptr;
 
     _put_file_data(callf, line, entry->fdata);
@@ -727,6 +750,7 @@ static inline struct io_entry *_io_alloc(
     struct file_data *fdata,
     void (*free)(const char *callf, uint line, void *ptr))
 {
+    PRINT_DEBUG;
     struct io_entry     *ret = NULL;
 
     if (size < sizeof(ret->op))
@@ -753,6 +777,7 @@ static inline struct io_entry *_io_alloc(
 
 int queue_io_rsp(struct io_entry *entry, size_t data_len, int status)
 {
+    PRINT_DEBUG;
     int                 ret = 0;
     struct file_data    *fdata = entry->fdata;
     struct zhpe_offloaded_common_hdr *op_hdr = &entry->op.hdr;
@@ -773,6 +798,7 @@ int queue_io_rsp(struct io_entry *entry, size_t data_len, int status)
 
 static int parse_platform(char *str)
 {
+    PRINT_DEBUG;
 	if (!str)
 		return -EINVAL;
 	if (strcmp(str, "pfslice") == 0) {
@@ -821,6 +847,7 @@ static int parse_page_grid_one(char *str, uint64_t max_page_count,
                                bool allow_cpu_visible,
                                struct sw_page_grid *pg)
 {
+    PRINT_DEBUG;
     char     *orig = str;
     uint64_t page_size, page_count;
 
@@ -857,6 +884,7 @@ static uint parse_page_grid_opt(char *str, uint64_t max_page_count,
                                 bool allow_cpu_visible,
                                 struct sw_page_grid pg[])
 {
+    PRINT_DEBUG;
     uint cnt = 0;
     int ret;
     char *str_copy, *s, *k;
@@ -908,6 +936,7 @@ static uint parse_page_grid_opt(char *str, uint64_t max_page_count,
 
 static int zhpe_offloaded_user_req_INIT(struct io_entry *entry)
 {
+    PRINT_DEBUG;
     union zhpe_offloaded_rsp      *rsp = &entry->op.rsp;
     struct file_data    *fdata = entry->fdata;
     struct uuid_tracker *uu;
@@ -964,6 +993,7 @@ static int iommu_invalid_ppr_cb(struct pci_dev *pdev, int pasid,
             unsigned long address, u16 flags)
 
 {
+    PRINT_DEBUG;
     printk(KERN_WARNING "%s:%s IOMMU PRR failure device = %s, pasid = %d address = 0x%lx flags = %ux\n",
           zhpe_offloaded_driver_name, __func__, pci_name(pdev), pasid,
           address, flags);
@@ -973,6 +1003,7 @@ static int iommu_invalid_ppr_cb(struct pci_dev *pdev, int pasid,
 
 static int zhpe_offloaded_bind_iommu(struct file_data *fdata)
 {
+    PRINT_DEBUG;
     int s, ret = 0;
     struct pci_dev *pdev;
 
@@ -993,6 +1024,7 @@ static int zhpe_offloaded_bind_iommu(struct file_data *fdata)
 
 static void zhpe_offloaded_unbind_iommu(struct file_data *fdata)
 {
+    PRINT_DEBUG;
     int s;
     struct pci_dev *pdev;
 
@@ -1010,6 +1042,7 @@ static void zhpe_offloaded_unbind_iommu(struct file_data *fdata)
 
 static int zhpe_offloaded_release(struct inode *inode, struct file *file)
 {
+    PRINT_DEBUG;
     struct file_data    *fdata = file->private_data;
     ulong               flags;
 
@@ -1044,6 +1077,7 @@ static int zhpe_offloaded_release(struct inode *inode, struct file *file)
 static ssize_t zhpe_offloaded_read(struct file *file, char __user *buf, size_t len,
                          loff_t *ppos)
 {
+    PRINT_DEBUG;
     ssize_t             ret = 0;
     struct file_data    *fdata = file->private_data;
     struct io_entry     *entry;
@@ -1097,6 +1131,7 @@ static ssize_t zhpe_offloaded_read(struct file *file, char __user *buf, size_t l
 static ssize_t zhpe_offloaded_write(struct file *file, const char __user *buf,
                           size_t len, loff_t *ppos)
 {
+    PRINT_DEBUG;
     ssize_t             ret = 0;
     struct file_data    *fdata = file->private_data;
     bool                nonblock = !!(file->f_flags & O_NONBLOCK);
@@ -1192,6 +1227,7 @@ static ssize_t zhpe_offloaded_write(struct file *file, const char __user *buf,
 
 static uint zhpe_offloaded_poll(struct file *file, struct poll_table_struct *wait)
 {
+    PRINT_DEBUG;
     uint                ret = 0;
     struct file_data    *fdata = file->private_data;
 
@@ -1213,18 +1249,21 @@ static uint zhpe_offloaded_poll(struct file *file, struct poll_table_struct *wai
 static inline int zhpe_offloaded_vma_wants_writenotify(struct vm_area_struct *vma,
                                              pgprot_t vm_page_prot)
 {
+    PRINT_DEBUG;
     return 0;
 }
 
 /* identical to vm_pgprot_modify, except for function name */
 static pgprot_t zhpe_offloaded_pgprot_modify(pgprot_t oldprot, unsigned long vm_flags)
 {
+    PRINT_DEBUG;
         return pgprot_modify(oldprot, vm_get_page_prot(vm_flags));
 }
 
 /* identical to vma_set_page_prot, except for function name */
 void zhpe_offloaded_vma_set_page_prot(struct vm_area_struct *vma)
 {
+        PRINT_DEBUG;
         unsigned long vm_flags = vma->vm_flags;
         pgprot_t vm_page_prot;
 
@@ -1240,6 +1279,7 @@ void zhpe_offloaded_vma_set_page_prot(struct vm_area_struct *vma)
 
 static int zhpe_offloaded_mmap(struct file *file, struct vm_area_struct *vma)
 {
+    PRINT_DEBUG;
     int                 ret = -ENOENT;
     struct file_data    *fdata = file->private_data;
     struct zmap         *zmap;
@@ -1571,6 +1611,7 @@ static int zhpe_offloaded_open(struct inode *inode, struct file *file)
 static int zhpe_offloaded_probe(struct pci_dev *pdev,
                       const struct pci_device_id *pdev_id)
 {
+    PRINT_DEBUG;
     int ret, pos;
     int l_slice_id;
     void __iomem *base_addr;
@@ -1722,6 +1763,7 @@ err_out:
 
 static void zhpe_offloaded_remove(struct pci_dev *pdev)
 {
+    PRINT_DEBUG;
     struct slice *sl;
 
     /* No teardown for function 0 */
@@ -1768,6 +1810,7 @@ static struct pci_driver zhpe_offloaded_pci_driver = {
 
 static int __init zhpe_offloaded_init(void)
 {
+    PRINT_DEBUG;
     int                 ret;
     int                 i;
     struct zhpe_offloaded_attr default_attr = {
@@ -1886,6 +1929,7 @@ err_out:
 
 static void zhpe_offloaded_exit(void)
 {
+    PRINT_DEBUG;
     if (miscdev.minor != MISC_DYNAMIC_MINOR)
         misc_deregister(&miscdev);
 

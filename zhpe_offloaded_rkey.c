@@ -71,6 +71,7 @@ static struct rkey_info rki;
 
 void zhpe_offloaded_rkey_init(void)
 {
+    PRINT_DEBUG;
     atomic_set(&rki.allocated, 0);
     rki.rbtree = RB_ROOT;
     spin_lock_init(&rki.rk_lock);
@@ -91,6 +92,7 @@ void zhpe_offloaded_rkey_init(void)
 
 void zhpe_offloaded_rkey_exit(void)
 {
+    PRINT_DEBUG;
     struct rb_node *rb, *next;
     ulong flags;
 
@@ -113,6 +115,7 @@ void zhpe_offloaded_rkey_exit(void)
 
 static inline uint32_t compute_subtree_count(struct rkey_node *rkn)
 {
+    PRINT_DEBUG;
     uint32_t count = rkn_count(rkn);
 
     if (rkn->rb.rb_left)
@@ -167,6 +170,7 @@ static struct rkey_node *rkey_search(struct rkey_info *rki, uint32_t rkey)
 
 static int rkey_delete(struct rkey_info *rki, uint32_t rkey)
 {
+    PRINT_DEBUG;
     struct rkey_node *rkn;
     struct rb_node *rb;
     struct rb_root *root = &rki->rbtree;
@@ -212,6 +216,7 @@ static int rkey_delete(struct rkey_info *rki, uint32_t rkey)
 static inline unsigned int rkey_ord_to_pos(const unsigned long *buf,
                                            unsigned int ord, unsigned int nbits)
 {
+    PRINT_DEBUG;
     unsigned int pos;
 
     for (pos = find_first_zero_bit(buf, nbits);
@@ -226,6 +231,7 @@ static struct rkey_node *insert_nth_free_rkey(struct rkey_info *rki,
                                               struct rkey_node *new_rkn,
                                               uint32_t ord, uint32_t *rkeyp)
 {
+    PRINT_DEBUG;
     uint32_t rkey = 0, rkey_base = 0, bit_pos;
     struct rb_root *root = &rki->rbtree;
     struct rb_node **new = &root->rb_node, *parent = NULL;
@@ -281,6 +287,7 @@ static struct rkey_node *insert_nth_free_rkey(struct rkey_info *rki,
 
 int zhpe_offloaded_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey)
 {
+    PRINT_DEBUG;
     uint32_t rand = 0, rkey;
     u8 rand_bytes[RKEY_RAND_BYTES];
     int allocated = 0, ret, i;
@@ -340,6 +347,7 @@ int zhpe_offloaded_rkey_alloc(uint32_t *ro_rkey, uint32_t *rw_rkey)
 
 void zhpe_offloaded_rkey_free(uint32_t ro_rkey, uint32_t rw_rkey)
 {
+    PRINT_DEBUG;
     if ((ro_rkey & RKEY_OS_MASK) != (rw_rkey & RKEY_OS_MASK))
         return;
 
@@ -350,6 +358,7 @@ void zhpe_offloaded_rkey_free(uint32_t ro_rkey, uint32_t rw_rkey)
 static char *rkey_bitmap_str(const unsigned long *bitmap, char *str,
                              const size_t maxlen)
 {
+    PRINT_DEBUG;
     int i, cnt, len = maxlen;
     char *p = str;
 
@@ -368,6 +377,7 @@ static char *rkey_bitmap_str(const unsigned long *bitmap, char *str,
 
 void zhpe_offloaded_rkey_print_all(void)
 {
+    PRINT_DEBUG;
     struct rb_node *node;
     uint32_t nodes = 0;
     ulong flags;

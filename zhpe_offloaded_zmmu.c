@@ -48,6 +48,7 @@
 
 char *zhpe_offloaded_gcid_str(const uint32_t gcid, char *str, const size_t len)
 {
+    PRINT_DEBUG;
     snprintf(str, len, "%04x", gcid >> 12);
     if (len > 4)
         str[4] = ':';
@@ -57,6 +58,7 @@ char *zhpe_offloaded_gcid_str(const uint32_t gcid, char *str, const size_t len)
 
 static void zmmu_page_grid_clear_all(struct page_grid *pg, bool sync)
 {
+    PRINT_DEBUG;
     struct page_grid zero = { 0 }, tmp;
     uint i;
 
@@ -71,6 +73,7 @@ static void zmmu_page_grid_clear_all(struct page_grid *pg, bool sync)
 
 static void zmmu_req_clear_all(struct req_zmmu *reqz, bool sync)
 {
+    PRINT_DEBUG;
     struct req_pte zero = { 0 }, tmp;
     uint i;
 
@@ -86,6 +89,7 @@ static void zmmu_req_clear_all(struct req_zmmu *reqz, bool sync)
 
 static void zmmu_rsp_clear_all(struct rsp_zmmu *rspz, bool sync)
 {
+    PRINT_DEBUG;
     struct rsp_pte zero = { 0 }, tmp;
     uint i;
 
@@ -101,6 +105,7 @@ static void zmmu_rsp_clear_all(struct rsp_zmmu *rspz, bool sync)
 
 void zhpe_offloaded_zmmu_clear_slice(struct slice *sl)
 {
+    PRINT_DEBUG;
     ulong flags;
 
     debug(DEBUG_ZMMU, "%s:%s,%u:sl=%px, slice_valid=%u\n",
@@ -121,6 +126,7 @@ void zhpe_offloaded_zmmu_clear_slice(struct slice *sl)
 static void zmmu_clear_pg_info(struct page_grid_info *pgi, uint entries,
                                bool free_radix_tree)
 {
+    PRINT_DEBUG;
     struct radix_tree_iter iter;
     void **slot;
 
@@ -142,6 +148,7 @@ static void zmmu_clear_pg_info(struct page_grid_info *pgi, uint entries,
 
 void zhpe_offloaded_zmmu_clear_all(struct bridge *br, bool free_radix_tree)
 {
+    PRINT_DEBUG;
     ulong flags;
 
     debug(DEBUG_ZMMU, "%s:%s,%u:br=%px, free_radix_tree=%u\n",
@@ -155,6 +162,7 @@ void zhpe_offloaded_zmmu_clear_all(struct bridge *br, bool free_radix_tree)
 static void zmmu_page_grid_setup_all(struct page_grid_info *pgi,
                                      struct page_grid *pg, bool sync, char *nm)
 {
+    PRINT_DEBUG;
     struct page_grid tmp;
     struct sw_page_grid *sw_pg = pgi->pg;
     uint i;
@@ -177,6 +185,7 @@ static void zmmu_page_grid_setup_all(struct page_grid_info *pgi,
 
 void zhpe_offloaded_zmmu_setup_slice(struct slice *sl)
 {
+    PRINT_DEBUG;
     struct bridge *br = BRIDGE_FROM_SLICE(sl);
     ulong flags;
 
@@ -201,6 +210,7 @@ void zhpe_offloaded_zmmu_setup_slice(struct slice *sl)
 static void zmmu_req_pte_write(struct zhpe_offloaded_rmr *rmr,
                                struct req_zmmu *reqz, bool valid, bool sync)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_pte_info *info = &rmr->pte_info;
     struct req_pte pte = { 0 }, tmp;
     uint i, first = info->pte_index, last = first + info->zmmu_pages - 1;
@@ -242,6 +252,7 @@ static void zmmu_req_pte_write(struct zhpe_offloaded_rmr *rmr,
 static void zmmu_rsp_pte_write(struct zhpe_offloaded_pte_info *info,
                                struct rsp_zmmu *rspz, bool valid, bool sync)
 {
+    PRINT_DEBUG;
     struct rsp_pte pte = { 0 }, tmp;
     uint i, first = info->pte_index, last = first + info->zmmu_pages - 1;
     uint64_t va, window_sz, length, ps, offset;
@@ -283,6 +294,7 @@ static void zmmu_rsp_pte_write(struct zhpe_offloaded_pte_info *info,
 
 static uint64_t zmmu_base_addr_insert(struct page_grid_info *pgi, uint pg_index)
 {
+    PRINT_DEBUG;
     struct rb_root *root = &pgi->base_addr_tree;
     struct rb_node **new = &root->rb_node, *parent = NULL;
     struct sw_page_grid *node = &pgi->pg[pg_index];
@@ -313,6 +325,7 @@ static uint64_t zmmu_base_addr_insert(struct page_grid_info *pgi, uint pg_index)
 
 static int zmmu_base_pte_insert(struct page_grid_info *pgi, uint pg_index)
 {
+    PRINT_DEBUG;
     struct rb_root *root = &pgi->base_pte_tree;
     struct rb_node **new = &root->rb_node, *parent = NULL;
     struct sw_page_grid *node = &pgi->pg[pg_index];
@@ -343,6 +356,7 @@ static int zmmu_base_pte_insert(struct page_grid_info *pgi, uint pg_index)
 
 static int zmmu_find_addr_range(struct page_grid_info *pgi, uint pg_index)
 {
+    PRINT_DEBUG;
     struct sw_page_grid *pg;
     struct rb_node *rb;
     bool cpu_visible    = pgi->pg[pg_index].cpu_visible;
@@ -412,6 +426,7 @@ static int zmmu_find_addr_range(struct page_grid_info *pgi, uint pg_index)
 
 static int zmmu_find_pg_pte_range(struct page_grid_info *pgi, uint pg_index)
 {
+    PRINT_DEBUG;
     struct sw_page_grid *pg;
     struct rb_node *rb;
     uint page_count = pgi->pg[pg_index].page_grid.page_count;
@@ -446,6 +461,7 @@ static int zmmu_find_pg_pte_range(struct page_grid_info *pgi, uint pg_index)
 static struct sw_page_grid *zmmu_pg_pte_search(struct page_grid_info *pgi,
                                                uint pg_index)
 {
+    PRINT_DEBUG;
     struct sw_page_grid *pg;
     struct rb_node *node;
     struct rb_root *root = &pgi->base_pte_tree;
@@ -472,6 +488,7 @@ static struct sw_page_grid *zmmu_pg_pte_search(struct page_grid_info *pgi,
 
 static void zmmu_free_pg_pte_range(struct page_grid_info *pgi, uint pg_index)
 {
+    PRINT_DEBUG;
     struct sw_page_grid *pg;
 
     /* caller must hold bridge zmmu lock */
@@ -483,6 +500,7 @@ static void zmmu_free_pg_pte_range(struct page_grid_info *pgi, uint pg_index)
 static struct sw_page_grid *zmmu_pg_addr_search(struct page_grid_info *pgi,
                                                 uint pg_index)
 {
+    PRINT_DEBUG;
     struct sw_page_grid *pg;
     struct rb_node *node;
     struct rb_root *root = &pgi->base_addr_tree;
@@ -509,6 +527,7 @@ static struct sw_page_grid *zmmu_pg_addr_search(struct page_grid_info *pgi,
 
 static void zmmu_free_pg_addr_range(struct page_grid_info *pgi, uint pg_index)
 {
+    PRINT_DEBUG;
     struct sw_page_grid *pg;
 
     /* caller must hold bridge zmmu lock */
@@ -521,6 +540,7 @@ static void _zmmu_req_page_grid_write_slice(struct slice *sl,
                                             struct sw_page_grid sw_pg[],
                                             uint pg_index, bool sync)
 {
+    PRINT_DEBUG;
     struct req_zmmu *reqz;
     struct page_grid tmp;
     ulong flags;
@@ -548,6 +568,7 @@ static void _zmmu_req_page_grid_write_slice(struct slice *sl,
 int zhpe_offloaded_zmmu_req_page_grid_alloc(struct bridge *br,
                                   struct sw_page_grid *sw_pg)
 {
+    PRINT_DEBUG;
     int pg_index, sl, pte_index, err;
     uint64_t base_addr;
     unsigned long key;
@@ -640,6 +661,7 @@ static void _zmmu_rsp_page_grid_write_slice(struct slice *sl,
                                             struct sw_page_grid sw_pg[],
                                             uint pg_index, bool sync)
 {
+    PRINT_DEBUG;
     struct rsp_zmmu *rspz;
     struct page_grid tmp;
     ulong flags;
@@ -667,6 +689,7 @@ static void _zmmu_rsp_page_grid_write_slice(struct slice *sl,
 int zhpe_offloaded_zmmu_rsp_page_grid_alloc(struct bridge *br,
                                   struct sw_page_grid *sw_pg)
 {
+    PRINT_DEBUG;
     int pg_index, sl, pte_index, err;
     uint64_t base_addr;
     ulong flags;
@@ -748,6 +771,7 @@ int zhpe_offloaded_zmmu_rsp_page_grid_alloc(struct bridge *br,
 
 uint64_t zhpe_offloaded_zmmu_pte_addr(const struct zhpe_offloaded_pte_info *info)
 {
+    PRINT_DEBUG;
     uint64_t base_addr, ps, pte_off;
     struct sw_page_grid *pg = info->pg;
 
@@ -763,6 +787,7 @@ uint64_t zhpe_offloaded_zmmu_pte_addr(const struct zhpe_offloaded_pte_info *info
 static struct sw_page_grid *zmmu_pg_page_size(struct zhpe_offloaded_pte_info *info,
                                               struct page_grid_info *pgi)
 {
+    PRINT_DEBUG;
     uint64_t addr_aligned, length_adjusted;
     struct sw_page_grid *sw_pg;
     int ps;
@@ -798,6 +823,7 @@ static struct sw_page_grid *zmmu_pg_page_size(struct zhpe_offloaded_pte_info *in
 
 static int zmmu_pte_insert(struct zhpe_offloaded_pte_info *info, struct sw_page_grid *pg)
 {
+    PRINT_DEBUG;
     struct rb_root *root = &pg->pte_tree;
     struct rb_node **new = &root->rb_node, *parent = NULL;
 
@@ -827,6 +853,7 @@ static int zmmu_pte_insert(struct zhpe_offloaded_pte_info *info, struct sw_page_
 
 static void zmmu_pte_erase(struct zhpe_offloaded_pte_info *info)
 {
+    PRINT_DEBUG;
     /* caller must hold bridge zmmu lock */
     if (info->pg != NULL) {
         rb_erase(&info->node, &info->pg->pte_tree);
@@ -837,6 +864,7 @@ static void zmmu_pte_erase(struct zhpe_offloaded_pte_info *info)
 static int zmmu_find_pte_range(struct zhpe_offloaded_pte_info *info,
                                struct sw_page_grid *pg)
 {
+    PRINT_DEBUG;
     struct rb_node *rb;
     struct zhpe_offloaded_pte_info *this;
     uint page_count = info->zmmu_pages;
@@ -878,6 +906,7 @@ static void _zmmu_req_pte_write_slice(struct slice *sl,
                                       bool valid,
                                       bool sync)
 {
+    PRINT_DEBUG;
     struct req_zmmu *reqz;
     ulong flags;
 
@@ -903,6 +932,7 @@ static void _zmmu_req_pte_write_slice(struct slice *sl,
 int zhpe_offloaded_zmmu_req_pte_alloc(struct zhpe_offloaded_rmr *rmr, uint64_t *req_addr,
                             uint32_t *pg_ps)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_pte_info  *info = &rmr->pte_info;
     struct bridge         *br = info->fdata->bridge;
     struct page_grid_info *pgi = &br->req_zmmu_pg;
@@ -948,6 +978,7 @@ int zhpe_offloaded_zmmu_req_pte_alloc(struct zhpe_offloaded_rmr *rmr, uint64_t *
 
 void zhpe_offloaded_zmmu_req_pte_free(struct zhpe_offloaded_rmr *rmr)
 {
+    PRINT_DEBUG;
     struct zhpe_offloaded_pte_info  *info = &rmr->pte_info;
     struct bridge         *br = info->fdata->bridge;
     uint                  sl;
@@ -975,6 +1006,7 @@ static void _zmmu_rsp_pte_write_slice(struct slice *sl,
                                       bool valid,
                                       bool sync)
 {
+    PRINT_DEBUG;
     struct rsp_zmmu *rspz;
     ulong flags;
 
@@ -1000,6 +1032,7 @@ static void _zmmu_rsp_pte_write_slice(struct slice *sl,
 int zhpe_offloaded_zmmu_rsp_pte_alloc(struct zhpe_offloaded_pte_info *info, uint64_t *rsp_zaddr,
                             uint32_t *pg_ps)
 {
+    PRINT_DEBUG;
     struct bridge         *br = info->fdata->bridge;
     struct page_grid_info *pgi = &br->rsp_zmmu_pg;
     struct sw_page_grid   *sw_pg;
@@ -1044,6 +1077,7 @@ int zhpe_offloaded_zmmu_rsp_pte_alloc(struct zhpe_offloaded_pte_info *info, uint
 
 void zhpe_offloaded_zmmu_rsp_take_snapshot(struct bridge *br)
 {
+    PRINT_DEBUG;
     uint                  sl;
     struct rsp_zmmu       *rspz;
     int                   slice_mask = ALL_SLICES;
@@ -1083,6 +1117,7 @@ void zhpe_offloaded_zmmu_rsp_take_snapshot(struct bridge *br)
 
 void zhpe_offloaded_zmmu_rsp_pte_free(struct zhpe_offloaded_pte_info *info)
 {
+    PRINT_DEBUG;
     struct bridge         *br = info->fdata->bridge;
     uint                  sl;
     ulong                 flags;
@@ -1105,6 +1140,7 @@ void zhpe_offloaded_zmmu_rsp_pte_free(struct zhpe_offloaded_pte_info *info)
 
 int zhpe_offloaded_user_req_ZMMU_REG(struct io_entry *entry)
 {
+    PRINT_DEBUG;
 #if 0
     union zhpe_offloaded_req          *req = &entry->op.req;
     union zhpe_offloaded_rsp          *rsp = &entry->op.rsp;
