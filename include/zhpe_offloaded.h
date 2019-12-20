@@ -66,6 +66,7 @@ typedef unsigned long long ullong;
 #endif
 
 #include "zhpe_offloaded_uapi.h"
+#include "debugging_macros.h"
 
 _EXTERN_C_BEG
 
