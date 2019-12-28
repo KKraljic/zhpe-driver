@@ -82,7 +82,7 @@ static struct zhpe_offloaded_umem *umem_search(struct file_data *fdata,
         } else if (result > 0) {
             rnode = rnode->rb_right;
         } else {
-            if (!(access & (ZHPE_OFFLOADEDMR_GET_REMOTE|ZHPE_OFFLOADEDMR_PUT_REMOTE)) ||
+            if (!(access & (ZHPE_OFFLOADED_MR_GET_REMOTE|ZHPE_OFFLOADED_MR_PUT_REMOTE)) ||
                 rsp_zaddr == zhpe_offloaded_zmmu_pte_addr(&unode->pte_info))
                 goto out;
             else
@@ -286,7 +286,7 @@ get_user_pages_compat(unsigned long start, unsigned long nr_pages,
  * @fdata: userspace context to pin memory for
  * @vaddr: userspace virtual address to start at
  * @size: length of region to pin
- * @access: ZHPE_OFFLOADEDMR_xxx flags for memory being pinned
+ * @access: ZHPE_OFFLOADED_MR_xxx flags for memory being pinned
  * @dmasync: flush in-flight DMA when the memory region is written
  */
 static noinline // Revisit: debug
@@ -336,7 +336,7 @@ struct zhpe_offloaded_umem *zhpe_offloaded_umem_get(struct file_data *fdata, uin
     info->space_type = GENZ_DATA;  /* the only supported type */
     umem->page_shift = PAGE_SHIFT;
     umem->pid	     = get_task_pid(current, PIDTYPE_PID);
-    umem->writable   = !!(access & (ZHPE_OFFLOADEDMR_GET|ZHPE_OFFLOADEDMR_PUT_REMOTE));
+    umem->writable   = !!(access & (ZHPE_OFFLOADED_MR_GET|ZHPE_OFFLOADED_MR_PUT_REMOTE));
     /* We assume the memory is from hugetlb until proven otherwise */
     umem->hugetlb    = 1;
     kref_init(&umem->refcount);
@@ -474,10 +474,10 @@ static void umem_free_zmmu(struct zhpe_offloaded_umem *umem)
     bool             local, remote, cpu_visible, individual;
 
     access = info->access;
-    local = !!(access & (ZHPE_OFFLOADEDMR_GET|ZHPE_OFFLOADEDMR_PUT));
-    remote = !!(access & (ZHPE_OFFLOADEDMR_GET_REMOTE|ZHPE_OFFLOADEDMR_PUT_REMOTE));
-    cpu_visible = !!(access & ZHPE_OFFLOADEDMR_REQ_CPU);
-    individual = !!(access & ZHPE_OFFLOADEDMR_INDIVIDUAL);
+    local = !!(access & (ZHPE_OFFLOADED_MR_GET|ZHPE_OFFLOADED_MR_PUT));
+    remote = !!(access & (ZHPE_OFFLOADED_MR_GET_REMOTE|ZHPE_OFFLOADED_MR_PUT_REMOTE));
+    cpu_visible = !!(access & ZHPE_OFFLOADED_MR_REQ_CPU);
+    individual = !!(access & ZHPE_OFFLOADED_MR_INDIVIDUAL);
 
     if (remote) {
         if (individual) {
@@ -709,8 +709,8 @@ static void rmr_free(struct kref *ref)
     bool             cpu_visible, individual;
 
     access = info->access;
-    cpu_visible = !!(access & ZHPE_OFFLOADEDMR_REQ_CPU);
-    individual = !!(access & ZHPE_OFFLOADEDMR_INDIVIDUAL);
+    cpu_visible = !!(access & ZHPE_OFFLOADED_MR_REQ_CPU);
+    individual = !!(access & ZHPE_OFFLOADED_MR_INDIVIDUAL);
     if (individual) {
         zhpe_offloaded_zmmu_req_pte_free(rmr);
     }
@@ -839,10 +839,10 @@ int zhpe_offloaded_user_req_MR_REG(struct io_entry *entry)
     vaddr = req->mr_reg.vaddr;
     len = req->mr_reg.len;
     access = req->mr_reg.access;
-    local = !!(access & (ZHPE_OFFLOADEDMR_GET|ZHPE_OFFLOADEDMR_PUT));
-    remote = !!(access & (ZHPE_OFFLOADEDMR_GET_REMOTE|ZHPE_OFFLOADEDMR_PUT_REMOTE));
-    cpu_visible = !!(access & ZHPE_OFFLOADEDMR_REQ_CPU);
-    individual = !!(access & ZHPE_OFFLOADEDMR_INDIVIDUAL);
+    local = !!(access & (ZHPE_OFFLOADED_MR_GET|ZHPE_OFFLOADED_MR_PUT));
+    remote = !!(access & (ZHPE_OFFLOADED_MR_GET_REMOTE|ZHPE_OFFLOADED_MR_PUT_REMOTE));
+    cpu_visible = !!(access & ZHPE_OFFLOADED_MR_REQ_CPU);
+    individual = !!(access & ZHPE_OFFLOADED_MR_INDIVIDUAL);
     dmasync = false;  /* Revisit: fix this */
 
     debug(DEBUG_MEMREG, "%s:%s,%u:vaddr = 0x%016llx, "
@@ -967,10 +967,10 @@ int zhpe_offloaded_user_req_RMR_IMPORT(struct io_entry *entry)
     rsp_zaddr = req->rmr_import.rsp_zaddr;
     len = req->rmr_import.len;
     access = req->rmr_import.access;
-    remote = !!(access & (ZHPE_OFFLOADEDMR_GET_REMOTE|ZHPE_OFFLOADEDMR_PUT_REMOTE));
-    writable = !!(access & ZHPE_OFFLOADEDMR_PUT_REMOTE);
-    cpu_visible = !!(access & ZHPE_OFFLOADEDMR_REQ_CPU);
-    individual = !!(access & ZHPE_OFFLOADEDMR_INDIVIDUAL);
+    remote = !!(access & (ZHPE_OFFLOADED_MR_GET_REMOTE|ZHPE_OFFLOADED_MR_PUT_REMOTE));
+    writable = !!(access & ZHPE_OFFLOADED_MR_PUT_REMOTE);
+    cpu_visible = !!(access & ZHPE_OFFLOADED_MR_REQ_CPU);
+    individual = !!(access & ZHPE_OFFLOADED_MR_INDIVIDUAL);
     dmasync = false;  /* Revisit: fix this */
 
     debug(DEBUG_MEMREG, "%s:%s,%u:uuid = %s, rsp_zaddr = 0x%016llx, "
