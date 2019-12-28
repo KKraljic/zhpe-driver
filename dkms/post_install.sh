@@ -6,10 +6,10 @@ set -e
 HNAME="zhpe_offloaded_helper"
 HDIR="/usr/local/libexec"   # optional on Debian/Ubuntu
 HPATH="${HDIR}/${HNAME}"
-PCONF="dkms/modprobe_zhpe.conf"
-PPATH="/etc/modprobe.d/zhpe.conf"
-MCONF="dkms/modules_zhpe.conf"
-MPATH="/etc/modules-load.d/zhpe.conf"
+PCONF="dkms/modprobe_zhpe_offloaded.conf"
+PPATH="/etc/modprobe.d/zhpe_offloaded.conf"
+MCONF="dkms/modules_zhpe_offloaded.conf"
+MPATH="/etc/modules-load.d/zhpe_offloaded.conf"
 
 (( $# == 2 )) || exit 1
 

@@ -6,8 +6,8 @@ set -e
 HNAME="zhpe_offloaded_helper"
 HDIR="/usr/local/libexec"   # optional on Debian/Ubuntu
 HPATH="${HDIR}/${HNAME}"
-PPATH="/etc/modprobe.d/zhpe.conf"
-MPATH="/etc/modules-load.d/zhpe.conf"
+PPATH="/etc/modprobe.d/zhpe_offloaded.conf"
+MPATH="/etc/modules-load.d/zhpe_offloaded.conf"
 
 (( $# == 1 )) || exit 1
 KERNELVER=${1}
