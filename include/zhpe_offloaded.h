@@ -109,8 +109,10 @@ enum {
     DEBUG_INTR          = 0x00004000,
 };
 
-/* ZHPE_OFFLOADED_MAGIC == 'ZHPE' */
-#define ZHPE_OFFLOADED_MAGIC      (0x47454E5A)
+/* ZHPE_OFFLOADED_MAGIC == 'GENZO'
+ * i.e. gen-z offloaded
+ * */
+#define ZHPE_OFFLOADED_MAGIC      (0x47454e5a4f)
 
 #define ZHPE_OFFLOADED_ENTRY_LEN  (64U)
 
