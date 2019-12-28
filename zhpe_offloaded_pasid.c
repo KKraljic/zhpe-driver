@@ -36,7 +36,7 @@
 
 #include <linux/kernel.h>
 #include <linux/idr.h>
-#include "zhpe_offlaoded.h"
+#include "zhpe_offloaded.h"
 #include "zhpe_offloaded_driver.h"
 
 static struct ida zhpe_offloaded_pasid_ida;
